@@ -18,6 +18,13 @@ export async function GET(request: NextRequest) {
         timeRemaining: epochInfo.timeRemaining,
         timestamp: new Date().toISOString(),
       },
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      }
     });
   } catch (error) {
     console.error('Epoch API error:', error);
@@ -27,7 +34,15 @@ export async function GET(request: NextRequest) {
         error: 'Failed to fetch epoch data',
         timestamp: new Date().toISOString(),
       },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'Surrogate-Control': 'no-store'
+        }
+      }
     );
   }
 }

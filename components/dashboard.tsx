@@ -175,7 +175,8 @@ export function Dashboard({ onRefreshUpdate }: DashboardProps) {
   const { data: epoch, isLoading: epochLoading } = useQuery({
     queryKey: ['epoch'],
     queryFn: fetchEpoch,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchInterval: 5000, // 5 seconds - same as other dashboard data
+    staleTime: 0, // Always consider data stale for real-time updates
     refetchOnWindowFocus: false,
   });
 
@@ -183,7 +184,7 @@ export function Dashboard({ onRefreshUpdate }: DashboardProps) {
     queryKey: ['transactions'],
     queryFn: fetchTransactions,
     refetchInterval: 5000, // 5 seconds - same as other dashboard data
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 0, // Always consider data stale for real-time updates
     refetchOnWindowFocus: false,
   });
 
@@ -205,6 +206,7 @@ export function Dashboard({ onRefreshUpdate }: DashboardProps) {
     queryKey: ['ping'],
     queryFn: fetchPing,
     refetchInterval: 5000, // 5 seconds - same as other dashboard data
+    staleTime: 0, // Always consider data stale for real-time updates
   });
 
   const { data: gas, isLoading: gasLoading } = useQuery({
