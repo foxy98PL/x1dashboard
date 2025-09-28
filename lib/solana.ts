@@ -114,19 +114,19 @@ export class SolanaRPC {
       const epochInfo = await this.connection.getEpochInfo();
       const currentTransactionCount = epochInfo.transactionCount || 0;
       
-      // Calculate real network TPS using multiple methods
+      // Calculate real network TPS using a more reliable method
       let networkTPS = 0;
       
       try {
-        // Method 1: Calculate TPS from recent block data
+        // Method 1: Calculate TPS from recent slot data
         const currentSlot = epochInfo.absoluteSlot;
-        const recentSlotCount = 20; // Look at last 20 slots
+        const recentSlotCount = 10; // Look at last 10 slots (more reliable)
         
-        // Get recent blocks to calculate actual TPS
+        // Get recent blocks with proper commitment level
         const recentBlocks = await this.connection.getBlocks(
           currentSlot - recentSlotCount, 
           currentSlot,
-          { commitment: 'confirmed' }
+          { commitment: 'finalized' } // Use finalized commitment
         );
         
         if (recentBlocks && recentBlocks.length > 1) {
@@ -134,20 +134,23 @@ export class SolanaRPC {
           let totalTransactions = 0;
           let validBlocks = 0;
           
-          for (let i = 0; i < recentBlocks.length - 1; i++) {
-            const currentBlock = recentBlocks[i];
-            const nextBlock = recentBlocks[i + 1];
+          // Sample a few blocks to avoid too many RPC calls
+          const sampleSize = Math.min(5, recentBlocks.length - 1);
+          const step = Math.max(1, Math.floor((recentBlocks.length - 1) / sampleSize));
+          
+          for (let i = 0; i < recentBlocks.length - 1; i += step) {
+            const blockSlot = recentBlocks[i];
             
-            if (currentBlock && nextBlock) {
-              // Get transaction count for each block
+            if (blockSlot) {
               try {
-                const currentBlockInfo = await this.connection.getBlock(currentBlock, {
-                  commitment: 'confirmed',
+                // Get block info with proper commitment
+                const blockInfo = await this.connection.getBlock(blockSlot, {
+                  commitment: 'finalized',
                   maxSupportedTransactionVersion: 0
                 });
                 
-                if (currentBlockInfo && currentBlockInfo.transactions) {
-                  totalTransactions += currentBlockInfo.transactions.length;
+                if (blockInfo && blockInfo.transactions) {
+                  totalTransactions += blockInfo.transactions.length;
                   validBlocks++;
                 }
               } catch (blockError) {
