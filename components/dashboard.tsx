@@ -5,6 +5,10 @@ import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import { TrendingUp, Clock, Activity, Users, Zap } from 'lucide-react';
+import { PingComponent } from './ping-component';
+import { NetworkStatsComponent } from './network-stats-component';
+import { EpochComponent } from './epoch-component';
+import { TPSComponent } from './tps-component';
 
 interface SupplyData {
   total: number;
@@ -13,39 +17,10 @@ interface SupplyData {
   timestamp: string;
 }
 
-interface EpochData {
-  epoch: number;
-  slotIndex: number;
-  slotsInEpoch: number;
-  absoluteSlot: number;
-  blockHeight: number;
-  transactionCount: number;
-  epochProgress: number;
-  timeRemaining: number;
-  timestamp: string;
-}
-
-interface TransactionData {
-  totalTransactions: number;
-  transactionsPerSecond: number;
-  timestamp: string;
-}
-
 interface StakingData {
   totalStaked: number;
   activeStake: number;
   inactiveStake: number;
-  timestamp: string;
-}
-
-interface PingData {
-  responseTime: number;
-  timestamp: string;
-}
-
-interface GasData {
-  normal: number;
-  fast: number;
   timestamp: string;
 }
 
@@ -79,18 +54,6 @@ async function fetchSupply(): Promise<SupplyData> {
   return data.data;
 }
 
-async function fetchEpoch(): Promise<EpochData> {
-  const response = await fetch(`/api/epoch?t=${Date.now()}`);
-  const data = await response.json();
-  return data.data;
-}
-
-async function fetchTransactions(): Promise<TransactionData> {
-  const response = await fetch(`/api/transactions?t=${Date.now()}`);
-  const data = await response.json();
-  return data.data;
-}
-
 async function fetchStaking(): Promise<StakingData> {
   const response = await fetch(`/api/staking?t=${Date.now()}`);
   const data = await response.json();
@@ -99,18 +62,6 @@ async function fetchStaking(): Promise<StakingData> {
 
 async function fetchValidators(): Promise<ValidatorData> {
   const response = await fetch(`/api/validators?t=${Date.now()}`);
-  const data = await response.json();
-  return data.data;
-}
-
-async function fetchPing(): Promise<PingData> {
-  const response = await fetch(`/api/ping?t=${Date.now()}`);
-  const data = await response.json();
-  return data.data;
-}
-
-async function fetchGas(): Promise<GasData> {
-  const response = await fetch(`/api/gas?t=${Date.now()}`);
   const data = await response.json();
   return data.data;
 }
@@ -133,24 +84,6 @@ function formatXNT(num: number): string {
   return num.toFixed(6) + ' XNT';
 }
 
-function formatGasPrice(num: number): string {
-  // For gas prices, show more decimal places for precision
-  if (num >= 1) return num.toFixed(6) + ' XNT';
-  if (num >= 0.001) return num.toFixed(6) + ' XNT';
-  return num.toFixed(8) + ' XNT';
-}
-
-function formatTimeRemaining(ms: number): string {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (days > 0) return `${days}d ${hours % 24}h`;
-  if (hours > 0) return `${hours}h ${minutes % 60}m`;
-  if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
-  return `${seconds}s`;
-}
 
 function formatPercentage(num: number): string {
   return `${num.toFixed(1)}%`;
@@ -165,57 +98,28 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onRefreshUpdate }: DashboardProps) {
-  const { data: supply, isLoading: supplyLoading, refetch: refetchSupply } = useQuery({
+  const { data: supply, isLoading: supplyLoading } = useQuery({
     queryKey: ['supply'],
     queryFn: fetchSupply,
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
   });
 
-  const { data: epoch, isLoading: epochLoading, refetch: refetchEpoch } = useQuery({
-    queryKey: ['epoch'],
-    queryFn: fetchEpoch,
-    refetchInterval: 5000, // 5 seconds - same as other dashboard data
-    staleTime: 0, // Always consider data stale for real-time updates
-    refetchOnWindowFocus: false,
-  });
-
-  const { data: transactions, isLoading: transactionsLoading, refetch: refetchTransactions } = useQuery({
-    queryKey: ['transactions'],
-    queryFn: fetchTransactions,
-    refetchInterval: 5000, // 5 seconds - same as other dashboard data
-    staleTime: 0, // Always consider data stale for real-time updates
-    refetchOnWindowFocus: false,
-  });
-
-  const { data: staking, isLoading: stakingLoading, refetch: refetchStaking } = useQuery({
+  const { data: staking, isLoading: stakingLoading } = useQuery({
     queryKey: ['staking'],
     queryFn: fetchStaking,
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
   });
 
-  const { data: validators, isLoading: validatorsLoading, refetch: refetchValidators } = useQuery({
+  const { data: validators, isLoading: validatorsLoading } = useQuery({
     queryKey: ['validators'],
     queryFn: fetchValidators,
     staleTime: 5 * 60 * 1000, // 5 minutes - prevent unnecessary refreshes
     refetchOnWindowFocus: false, // Don't refetch when window gains focus
   });
 
-  const { data: ping, isLoading: pingLoading, refetch: refetchPing } = useQuery({
-    queryKey: ['ping'],
-    queryFn: fetchPing,
-    refetchInterval: 5000, // 5 seconds - same as other dashboard data
-    staleTime: 0, // Always consider data stale for real-time updates
-  });
-
-  const { data: gas, isLoading: gasLoading, refetch: refetchGas } = useQuery({
-    queryKey: ['gas'],
-    queryFn: fetchGas,
-    refetchInterval: 5000, // 5 seconds - same as other dashboard data
-  });
-
-  const isLoading = supplyLoading || epochLoading || transactionsLoading || stakingLoading || validatorsLoading || pingLoading || gasLoading;
+  const isLoading = supplyLoading || stakingLoading || validatorsLoading;
 
   // Track refresh times and notify parent
   useEffect(() => {
@@ -225,34 +129,10 @@ export function Dashboard({ onRefreshUpdate }: DashboardProps) {
   }, [supply?.timestamp, onRefreshUpdate]);
 
   useEffect(() => {
-    if (epoch?.timestamp) {
-      onRefreshUpdate?.(epoch.timestamp);
-    }
-  }, [epoch?.timestamp, onRefreshUpdate]);
-
-  useEffect(() => {
-    if (transactions?.timestamp) {
-      onRefreshUpdate?.(transactions.timestamp);
-    }
-  }, [transactions?.timestamp, onRefreshUpdate]);
-
-  useEffect(() => {
     if (staking?.timestamp) {
       onRefreshUpdate?.(staking.timestamp);
     }
   }, [staking?.timestamp, onRefreshUpdate]);
-
-  useEffect(() => {
-    if (ping?.timestamp) {
-      onRefreshUpdate?.(ping.timestamp);
-    }
-  }, [ping?.timestamp, onRefreshUpdate]);
-
-  useEffect(() => {
-    if (gas?.timestamp) {
-      onRefreshUpdate?.(gas.timestamp);
-    }
-  }, [gas?.timestamp, onRefreshUpdate]);
 
   if (isLoading) {
     return (
@@ -341,45 +221,7 @@ export function Dashboard({ onRefreshUpdate }: DashboardProps) {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
-                    <Clock className="h-5 w-5 text-indigo-600" />
-                    Current Epoch
-                  </CardTitle>
-                  <CardDescription className="text-slate-600 dark:text-slate-400">
-                    Epoch progress and timing information
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-indigo-700 dark:text-indigo-300 mb-2">
-                        {epoch ? epoch.epoch : 'N/A'}
-                      </div>
-                      <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Current Epoch</div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-sm font-medium">
-                        <span className="text-slate-600 dark:text-slate-400">Progress</span>
-                        <span className="text-indigo-700 dark:text-indigo-300">{epoch ? formatPercentage(epoch.epochProgress) : '0%'}</span>
-                      </div>
-                      <div className="w-full bg-indigo-100 dark:bg-indigo-900/30 rounded-full h-3">
-                        <div 
-                          className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-3 rounded-full transition-all duration-500"
-                          style={{ width: `${epoch ? epoch.epochProgress : 0}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-semibold text-indigo-700 dark:text-indigo-300">
-                        {epoch ? formatTimeRemaining(epoch.timeRemaining) : 'N/A'}
-                      </div>
-                      <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Time Remaining</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <EpochComponent onRefreshUpdate={onRefreshUpdate} />
             </motion.div>
 
             {/* Transactions Card */}
@@ -388,39 +230,7 @@ export function Dashboard({ onRefreshUpdate }: DashboardProps) {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
-                    <Activity className="h-5 w-5 text-emerald-600" />
-                    Transaction Metrics
-                  </CardTitle>
-                  <CardDescription className="text-slate-600 dark:text-slate-400">
-                    Network transaction volume and throughput
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-2">
-                        {transactions ? formatNumber(transactions.totalTransactions) : 'N/A'}
-                      </div>
-                      <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                        Total Transactions
-                      </div>
-                    </div>
-                    <div className={`text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30 rounded-lg border border-emerald-200 dark:border-emerald-700 transition-opacity duration-300 ${
-                      !transactions || transactions.transactionsPerSecond === 0 ? 'opacity-30' : 'opacity-100'
-                    }`}>
-                      <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mb-2">
-                        {transactions && transactions.transactionsPerSecond > 0 ? `${transactions.transactionsPerSecond} TPS` : '0 TPS'}
-                      </div>
-                      <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                        Transactions per second
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <TPSComponent onRefreshUpdate={onRefreshUpdate} />
             </motion.div>
 
             {/* Validators Card */}
@@ -489,75 +299,26 @@ export function Dashboard({ onRefreshUpdate }: DashboardProps) {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.6 }}
             >
-              <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
-                    <Activity className="h-5 w-5 text-red-600" />
-                    Network Performance
-                  </CardTitle>
-                  <CardDescription className="text-slate-600 dark:text-slate-400">
-                    RPC endpoint response time monitoring
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-4">
-                    {/* Response Time */}
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-red-700 dark:text-red-300 mb-2">
-                        {ping ? `${ping.responseTime}ms` : 'N/A'}
-                      </div>
-                      <div className="text-sm font-medium text-red-600 dark:text-red-400 mb-3">
-                        Response Time
-                      </div>
-                      {ping && (
-                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                          ping.responseTime < 100 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400' : 
-                          ping.responseTime < 300 ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400' : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                        }`}>
-                          {ping.responseTime < 100 ? 'Excellent' : 
-                           ping.responseTime < 300 ? 'Good' : 'Slow'}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Gas Simulation */}
-                    {gas && (
-                      <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
-                        <div className="text-center mb-3">
-                          <div className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                            Gas Simulation
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-lg border border-blue-200 dark:border-blue-700">
-                            <div className="text-lg font-bold text-blue-700 dark:text-blue-300 mb-1">
-                              {formatGasPrice(gas.normal)}
-                            </div>
-                            <div className="text-xs font-medium text-blue-600 dark:text-blue-400">
-                              Normal
-                            </div>
-                          </div>
-                          <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-lg border border-purple-200 dark:border-purple-700">
-                            <div className="text-lg font-bold text-purple-700 dark:text-purple-300 mb-1">
-                              {formatGasPrice(gas.fast)}
-                            </div>
-                            <div className="text-xs font-medium text-purple-600 dark:text-purple-400">
-                              Fast
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <PingComponent onRefreshUpdate={onRefreshUpdate} />
             </motion.div>
 
-            {/* Staking Card */}
+            {/* Network Stats Card */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.7 }}
+            >
+              <NetworkStatsComponent onRefreshUpdate={onRefreshUpdate} />
+            </motion.div>
+          </div>
+
+          {/* Fourth Row */}
+          <div className="grid grid-cols-1 gap-4">
+            {/* Staking Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
             >
               <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
                 <CardHeader className="pb-4">
