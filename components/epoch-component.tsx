@@ -16,6 +16,9 @@ interface EpochData {
   epochProgress: number;
   timeRemaining: number;
   timestamp: string;
+  requestId?: string;
+  apiResponseTime?: number;
+  refreshId?: string;
 }
 
 interface EpochComponentProps {

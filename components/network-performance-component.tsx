@@ -8,12 +8,18 @@ import { Activity } from 'lucide-react';
 interface PingData {
   responseTime: number;
   timestamp: string;
+  requestId?: string;
+  apiResponseTime?: number;
+  refreshId?: string;
 }
 
 interface GasData {
   normal: number;
   fast: number;
   timestamp: string;
+  requestId?: string;
+  apiResponseTime?: number;
+  refreshId?: string;
 }
 
 interface NetworkPerformanceComponentProps {

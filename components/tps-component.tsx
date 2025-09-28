@@ -10,6 +10,9 @@ interface TransactionData {
   totalTransactions: number;
   transactionsPerSecond: number;
   timestamp: string;
+  requestId?: string;
+  apiResponseTime?: number;
+  refreshId?: string;
 }
 
 interface TPSComponentProps {
