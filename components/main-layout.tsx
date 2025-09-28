@@ -33,6 +33,13 @@ export function MainLayout() {
     setLastRefresh(timestamp);
   };
 
+  const handleRefresh = () => {
+    // Force refresh by updating the timestamp
+    setLastRefresh(new Date().toISOString());
+    // Force refresh all queries
+    window.location.reload();
+  };
+
   const renderCurrentView = () => {
     switch (currentView) {
       case 'dashboard':
@@ -59,6 +66,7 @@ export function MainLayout() {
           lastRefresh={lastRefresh}
           isOnline={isOnline}
           currentView={currentView}
+          onRefresh={handleRefresh}
         />
         
         {renderCurrentView()}

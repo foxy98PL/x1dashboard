@@ -9,9 +9,10 @@ interface HeaderProps {
   lastRefresh?: string;
   isOnline: boolean;
   currentView?: 'dashboard' | 'validators';
+  onRefresh?: () => void;
 }
 
-export function Header({ onMenuToggle, lastRefresh, isOnline, currentView }: HeaderProps) {
+export function Header({ onMenuToggle, lastRefresh, isOnline, currentView, onRefresh }: HeaderProps) {
   const [nextUpdateCountdown, setNextUpdateCountdown] = useState<string>('5s');
 
   useEffect(() => {
@@ -76,6 +77,15 @@ export function Header({ onMenuToggle, lastRefresh, isOnline, currentView }: Hea
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            {currentView === 'dashboard' && onRefresh && (
+              <button
+                onClick={onRefresh}
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                title="Refresh data"
+              >
+                <RefreshCw className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+              </button>
+            )}
             {isOnline ? (
               <Wifi className="h-4 w-4 text-emerald-500" />
             ) : (

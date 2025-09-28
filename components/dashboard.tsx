@@ -74,43 +74,43 @@ interface ValidatorData {
 
 // API fetch functions
 async function fetchSupply(): Promise<SupplyData> {
-  const response = await fetch('/api/supply');
+  const response = await fetch(`/api/supply?t=${Date.now()}`);
   const data = await response.json();
   return data.data;
 }
 
 async function fetchEpoch(): Promise<EpochData> {
-  const response = await fetch('/api/epoch');
+  const response = await fetch(`/api/epoch?t=${Date.now()}`);
   const data = await response.json();
   return data.data;
 }
 
 async function fetchTransactions(): Promise<TransactionData> {
-  const response = await fetch('/api/transactions');
+  const response = await fetch(`/api/transactions?t=${Date.now()}`);
   const data = await response.json();
   return data.data;
 }
 
 async function fetchStaking(): Promise<StakingData> {
-  const response = await fetch('/api/staking');
+  const response = await fetch(`/api/staking?t=${Date.now()}`);
   const data = await response.json();
   return data.data;
 }
 
 async function fetchValidators(): Promise<ValidatorData> {
-  const response = await fetch('/api/validators');
+  const response = await fetch(`/api/validators?t=${Date.now()}`);
   const data = await response.json();
   return data.data;
 }
 
 async function fetchPing(): Promise<PingData> {
-  const response = await fetch('/api/ping');
+  const response = await fetch(`/api/ping?t=${Date.now()}`);
   const data = await response.json();
   return data.data;
 }
 
 async function fetchGas(): Promise<GasData> {
-  const response = await fetch('/api/gas');
+  const response = await fetch(`/api/gas?t=${Date.now()}`);
   const data = await response.json();
   return data.data;
 }
@@ -165,14 +165,14 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onRefreshUpdate }: DashboardProps) {
-  const { data: supply, isLoading: supplyLoading } = useQuery({
+  const { data: supply, isLoading: supplyLoading, refetch: refetchSupply } = useQuery({
     queryKey: ['supply'],
     queryFn: fetchSupply,
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
   });
 
-  const { data: epoch, isLoading: epochLoading } = useQuery({
+  const { data: epoch, isLoading: epochLoading, refetch: refetchEpoch } = useQuery({
     queryKey: ['epoch'],
     queryFn: fetchEpoch,
     refetchInterval: 5000, // 5 seconds - same as other dashboard data
@@ -180,7 +180,7 @@ export function Dashboard({ onRefreshUpdate }: DashboardProps) {
     refetchOnWindowFocus: false,
   });
 
-  const { data: transactions, isLoading: transactionsLoading } = useQuery({
+  const { data: transactions, isLoading: transactionsLoading, refetch: refetchTransactions } = useQuery({
     queryKey: ['transactions'],
     queryFn: fetchTransactions,
     refetchInterval: 5000, // 5 seconds - same as other dashboard data
@@ -188,28 +188,28 @@ export function Dashboard({ onRefreshUpdate }: DashboardProps) {
     refetchOnWindowFocus: false,
   });
 
-  const { data: staking, isLoading: stakingLoading } = useQuery({
+  const { data: staking, isLoading: stakingLoading, refetch: refetchStaking } = useQuery({
     queryKey: ['staking'],
     queryFn: fetchStaking,
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
   });
 
-  const { data: validators, isLoading: validatorsLoading } = useQuery({
+  const { data: validators, isLoading: validatorsLoading, refetch: refetchValidators } = useQuery({
     queryKey: ['validators'],
     queryFn: fetchValidators,
     staleTime: 5 * 60 * 1000, // 5 minutes - prevent unnecessary refreshes
     refetchOnWindowFocus: false, // Don't refetch when window gains focus
   });
 
-  const { data: ping, isLoading: pingLoading } = useQuery({
+  const { data: ping, isLoading: pingLoading, refetch: refetchPing } = useQuery({
     queryKey: ['ping'],
     queryFn: fetchPing,
     refetchInterval: 5000, // 5 seconds - same as other dashboard data
     staleTime: 0, // Always consider data stale for real-time updates
   });
 
-  const { data: gas, isLoading: gasLoading } = useQuery({
+  const { data: gas, isLoading: gasLoading, refetch: refetchGas } = useQuery({
     queryKey: ['gas'],
     queryFn: fetchGas,
     refetchInterval: 5000, // 5 seconds - same as other dashboard data
