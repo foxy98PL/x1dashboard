@@ -2,7 +2,7 @@ import { Connection, PublicKey } from '@solana/web3.js';
 
 const RPC_ENDPOINT = process.env.RPC_ENDPOINT || 'https://rpc.testnet.x1.xyz/';
 
-export const connection = new Connection(RPC_ENDPOINT, 'confirmed');
+export const connection = new Connection(RPC_ENDPOINT, 'finalized');
 
 export interface SupplyInfo {
   total: number;
@@ -54,7 +54,7 @@ export class SolanaRPC {
   private connection: Connection;
 
   constructor() {
-    this.connection = new Connection(RPC_ENDPOINT, 'confirmed');
+    this.connection = new Connection(RPC_ENDPOINT, 'finalized');
   }
 
   async getSupply(): Promise<SupplyInfo> {
@@ -114,62 +114,41 @@ export class SolanaRPC {
       const epochInfo = await this.connection.getEpochInfo();
       const currentTransactionCount = epochInfo.transactionCount || 0;
       
-      // Calculate real network TPS using a more reliable method
+      // Calculate network TPS using a simpler, more reliable method
       let networkTPS = 0;
       
       try {
-        // Method 1: Calculate TPS from recent slot data
-        const currentSlot = epochInfo.absoluteSlot;
-        const recentSlotCount = 10; // Look at last 10 slots (more reliable)
+        // Method 1: Use recent transaction signatures to estimate TPS
+        // Get recent signatures from a known program (System Program)
+        const systemProgramId = new PublicKey('11111111111111111111111111111111');
         
-        // Get recent blocks with proper commitment level
-        const recentBlocks = await this.connection.getBlocks(
-          currentSlot - recentSlotCount, 
-          currentSlot,
-          { commitment: 'finalized' } // Use finalized commitment
-        );
-        
-        if (recentBlocks && recentBlocks.length > 1) {
-          // Calculate transactions per slot over recent blocks
-          let totalTransactions = 0;
-          let validBlocks = 0;
+        try {
+          const recentSignatures = await this.connection.getSignaturesForAddress(
+            systemProgramId,
+            { limit: 50, commitment: 'finalized' }
+          );
           
-          // Sample a few blocks to avoid too many RPC calls
-          const sampleSize = Math.min(5, recentBlocks.length - 1);
-          const step = Math.max(1, Math.floor((recentBlocks.length - 1) / sampleSize));
-          
-          for (let i = 0; i < recentBlocks.length - 1; i += step) {
-            const blockSlot = recentBlocks[i];
+          if (recentSignatures && recentSignatures.length > 0) {
+            // Calculate TPS based on recent signatures
+            const now = Date.now();
+            const timeWindow = 10000; // 10 seconds
+            const tenSecondsAgo = now - timeWindow;
             
-            if (blockSlot) {
-              try {
-                // Get block info with proper commitment
-                const blockInfo = await this.connection.getBlock(blockSlot, {
-                  commitment: 'finalized',
-                  maxSupportedTransactionVersion: 0
-                });
-                
-                if (blockInfo && blockInfo.transactions) {
-                  totalTransactions += blockInfo.transactions.length;
-                  validBlocks++;
-                }
-              } catch (blockError) {
-                // Skip this block if we can't get its data
-                continue;
-              }
-            }
+            // Count signatures from the last 10 seconds
+            const recentCount = recentSignatures.filter(sig => {
+              const sigTime = sig.blockTime ? sig.blockTime * 1000 : 0;
+              return sigTime > tenSecondsAgo;
+            }).length;
+            
+            // Calculate TPS (this is a sample, multiply by estimated factor)
+            const sampleTPS = recentCount / (timeWindow / 1000); // transactions per second
+            const estimatedFactor = 5; // System program represents ~20% of all transactions
+            networkTPS = Math.round(sampleTPS * estimatedFactor);
+            
+            console.log(`Network TPS calculation: ${recentCount} system transactions in 10s = ${sampleTPS.toFixed(2)} tx/s × ${estimatedFactor} = ${networkTPS} TPS`);
           }
-          
-          if (validBlocks > 0) {
-            // Calculate average transactions per slot
-            const avgTransactionsPerSlot = totalTransactions / validBlocks;
-            
-            // Convert to TPS (assuming ~400ms per slot)
-            const slotsPerSecond = 1000 / 400; // 2.5 slots per second
-            networkTPS = Math.round(avgTransactionsPerSlot * slotsPerSecond);
-            
-            console.log(`Network TPS calculation: ${totalTransactions} transactions across ${validBlocks} blocks = ${avgTransactionsPerSlot.toFixed(2)} tx/slot = ${networkTPS} TPS`);
-          }
+        } catch (signatureError) {
+          console.log('Signature-based TPS calculation failed:', signatureError);
         }
         
         // Method 2: Fallback calculation using epoch progress
