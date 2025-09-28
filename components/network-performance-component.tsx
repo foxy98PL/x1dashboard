@@ -57,16 +57,13 @@ async function fetchGas(): Promise<GasData> {
 }
 
 function formatPingTime(ms: number): string {
-  if (ms < 100) return `${ms}ms`;
-  if (ms < 1000) return `${(ms / 1000).toFixed(2)}s`;
-  return `${(ms / 1000).toFixed(1)}s`;
+  return `${ms}ms`;
 }
 
-function formatGasPrice(price: number): string {
-  if (price >= 0.01) return price.toFixed(4) + ' XNT';
-  if (price >= 0.001) return price.toFixed(5) + ' XNT';
-  if (price >= 0.0001) return price.toFixed(6) + ' XNT';
-  return price.toFixed(8) + ' XNT';
+function formatGasPrice(num: number): string {
+  if (num >= 1) return num.toFixed(6) + ' XNT';
+  if (num >= 0.001) return num.toFixed(6) + ' XNT';
+  return num.toFixed(8) + ' XNT';
 }
 
 function getPingStatus(responseTime: number): { label: string; color: string } {
@@ -99,7 +96,7 @@ export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerforma
             responseTime: ping.responseTime + 'ms',
             timestamp: ping.timestamp,
             requestId: ping.requestId,
-            apiResponseTime: ping.apiResponseTime,
+            apiResponseTime: ping.apiResponseTime + 'ms',
             refreshId: ping.refreshId,
           });
         }
