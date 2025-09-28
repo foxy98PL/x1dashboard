@@ -21,33 +21,53 @@ interface NetworkPerformanceComponentProps {
 }
 
 async function fetchPing(): Promise<PingData> {
-  const timestamp = Date.now();
-  const randomId = Math.random().toString(36).substring(7);
-  const response = await fetch(`/api/ping?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
-    cache: 'no-store',
-    headers: {
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-    },
-  });
-  const data = await response.json();
-  return data.data;
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  if (isProduction) {
+    // Aggressive cache-busting for production
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substring(7);
+    const response = await fetch(`/api/ping?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
+    const data = await response.json();
+    return data.data;
+  } else {
+    // Normal fetch for local development
+    const response = await fetch(`/api/ping?t=${Date.now()}`);
+    const data = await response.json();
+    return data.data;
+  }
 }
 
 async function fetchGas(): Promise<GasData> {
-  const timestamp = Date.now();
-  const randomId = Math.random().toString(36).substring(7);
-  const response = await fetch(`/api/gas?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
-    cache: 'no-store',
-    headers: {
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-    },
-  });
-  const data = await response.json();
-  return data.data;
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  if (isProduction) {
+    // Aggressive cache-busting for production
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substring(7);
+    const response = await fetch(`/api/gas?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
+    const data = await response.json();
+    return data.data;
+  } else {
+    // Normal fetch for local development
+    const response = await fetch(`/api/gas?t=${Date.now()}`);
+    const data = await response.json();
+    return data.data;
+  }
 }
 
 function formatPingTime(ms: number): string {
@@ -70,28 +90,33 @@ function getPingStatus(responseTime: number): { label: string; color: string } {
 }
 
 export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerformanceComponentProps) {
+  const isProduction = process.env.NODE_ENV === 'production';
   const [refreshKey, setRefreshKey] = React.useState(0);
 
-  // Force refresh every 5 seconds by updating the query key
+  // Force refresh every 5 seconds by updating the query key (production only)
   React.useEffect(() => {
+    if (!isProduction) return;
+    
     const interval = setInterval(() => {
       setRefreshKey(prev => prev + 1);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isProduction]);
 
   const { data: ping, isLoading: pingLoading } = useQuery({
-    queryKey: [`ping-combined-${refreshKey}`, Date.now()],
+    queryKey: isProduction ? [`ping-combined-${refreshKey}`, Date.now()] : ['ping-combined'],
     queryFn: fetchPing,
-    staleTime: 0, // Always consider data stale
+    refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
+    staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
     refetchOnWindowFocus: false,
   });
 
   const { data: gas, isLoading: gasLoading } = useQuery({
-    queryKey: [`gas-combined-${refreshKey}`, Date.now()],
+    queryKey: isProduction ? [`gas-combined-${refreshKey}`, Date.now()] : ['gas-combined'],
     queryFn: fetchGas,
-    staleTime: 0, // Always consider data stale
+    refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
+    staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
     refetchOnWindowFocus: false,
   });
 

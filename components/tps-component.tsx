@@ -17,18 +17,28 @@ interface TPSComponentProps {
 }
 
 async function fetchTransactions(): Promise<TransactionData> {
-  const timestamp = Date.now();
-  const randomId = Math.random().toString(36).substring(7);
-  const response = await fetch(`/api/transactions?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
-    cache: 'no-store',
-    headers: {
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-    },
-  });
-  const data = await response.json();
-  return data.data;
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  if (isProduction) {
+    // Aggressive cache-busting for production
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substring(7);
+    const response = await fetch(`/api/transactions?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
+    const data = await response.json();
+    return data.data;
+  } else {
+    // Normal fetch for local development
+    const response = await fetch(`/api/transactions?t=${Date.now()}`);
+    const data = await response.json();
+    return data.data;
+  }
 }
 
 function formatNumber(num: number): string {
@@ -39,21 +49,25 @@ function formatNumber(num: number): string {
 }
 
 export function TPSComponent({ onRefreshUpdate }: TPSComponentProps) {
+  const isProduction = process.env.NODE_ENV === 'production';
   const [refreshKey, setRefreshKey] = React.useState(0);
 
-  // Force refresh every 5 seconds by updating the query key
+  // Force refresh every 5 seconds by updating the query key (production only)
   React.useEffect(() => {
+    if (!isProduction) return;
+    
     const interval = setInterval(() => {
       setRefreshKey(prev => prev + 1);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isProduction]);
 
   const { data: transactions, isLoading } = useQuery({
-    queryKey: [`tps-component-${refreshKey}`, Date.now()],
+    queryKey: isProduction ? [`tps-component-${refreshKey}`, Date.now()] : ['tps-component'],
     queryFn: fetchTransactions,
-    staleTime: 0, // Always consider data stale
+    refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
+    staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
     refetchOnWindowFocus: false,
   });
 

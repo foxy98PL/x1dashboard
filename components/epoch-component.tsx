@@ -23,18 +23,28 @@ interface EpochComponentProps {
 }
 
 async function fetchEpoch(): Promise<EpochData> {
-  const timestamp = Date.now();
-  const randomId = Math.random().toString(36).substring(7);
-  const response = await fetch(`/api/epoch?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
-    cache: 'no-store',
-    headers: {
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-    },
-  });
-  const data = await response.json();
-  return data.data;
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  if (isProduction) {
+    // Aggressive cache-busting for production
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substring(7);
+    const response = await fetch(`/api/epoch?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
+    const data = await response.json();
+    return data.data;
+  } else {
+    // Normal fetch for local development
+    const response = await fetch(`/api/epoch?t=${Date.now()}`);
+    const data = await response.json();
+    return data.data;
+  }
 }
 
 function formatTimeRemaining(ms: number): string {
@@ -50,21 +60,25 @@ function formatTimeRemaining(ms: number): string {
 }
 
 export function EpochComponent({ onRefreshUpdate }: EpochComponentProps) {
+  const isProduction = process.env.NODE_ENV === 'production';
   const [refreshKey, setRefreshKey] = React.useState(0);
 
-  // Force refresh every 5 seconds by updating the query key
+  // Force refresh every 5 seconds by updating the query key (production only)
   React.useEffect(() => {
+    if (!isProduction) return;
+    
     const interval = setInterval(() => {
       setRefreshKey(prev => prev + 1);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isProduction]);
 
   const { data: epoch, isLoading } = useQuery({
-    queryKey: [`epoch-component-${refreshKey}`, Date.now()],
+    queryKey: isProduction ? [`epoch-component-${refreshKey}`, Date.now()] : ['epoch-component'],
     queryFn: fetchEpoch,
-    staleTime: 0, // Always consider data stale
+    refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
+    staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
     refetchOnWindowFocus: false,
   });
 
