@@ -16,7 +16,7 @@ interface PingComponentProps {
 }
 
 async function fetchPing(): Promise<PingData> {
-  const response = await fetch(`/api/ping?t=${Date.now()}`);
+  const response = await fetch(`/api/ping?t=${Date.now()}`, { cache: 'no-store' });
   const data = await response.json();
   return data.data;
 }

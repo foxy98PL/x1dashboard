@@ -1,21 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { solanaRPC } from '@/lib/solana';
-
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   const requestId = Math.random().toString(36).substring(7);
   const startTime = Date.now();
   
-  console.log(`[${requestId}] Gas API called at ${new Date().toISOString()}`);
+  console.debug(`[${requestId}] Gas API called at ${new Date().toISOString()}`);
   
   try {
     // Simulate gas prices for normal and fast transactions
     // In a real implementation, this would fetch actual gas prices from the network
-    console.log(`[${requestId}] Making RPC call to getGasPrices...`);
+    console.debug(`[${requestId}] Making RPC call to getGasPrices...`);
     const gasPrices = await solanaRPC.getGasPrices();
     const timestamp = new Date().toISOString();
     const responseTime = Date.now() - startTime;
     
-    console.log(`[${requestId}] RPC call completed in ${responseTime}ms, normal: ${gasPrices.normal}, fast: ${gasPrices.fast}`);
+    console.debug(`[${requestId}] RPC call completed in ${responseTime}ms, normal: ${gasPrices.normal}, fast: ${gasPrices.fast}`);
     
     const response = {
       success: true,
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
       },
     };
     
-    console.log(`[${requestId}] Sending response:`, response);
+    console.debug(`[${requestId}] Sending response:`, response);
     
     return NextResponse.json(response, {
       headers: {
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
       apiResponseTime: responseTime,
     };
     
-    console.log(`[${requestId}] Sending error response:`, errorResponse);
+    console.debug(`[${requestId}] Sending error response:`, errorResponse);
     
     return NextResponse.json(errorResponse, { 
       status: 500,

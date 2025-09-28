@@ -92,7 +92,7 @@ export class SolanaRPC {
       const blockHeight = epochInfo.blockHeight || 0;
       const transactionCount = epochInfo.transactionCount || 0;
       
-      console.log(`Epoch ${epochInfo.epoch}: ${epochProgress.toFixed(1)}% complete, ${slotsRemaining} slots remaining`);
+      console.debug(`Epoch ${epochInfo.epoch}: ${epochProgress.toFixed(1)}% complete, ${slotsRemaining} slots remaining`);
       
       return {
         epoch: epochInfo.epoch,
@@ -128,9 +128,9 @@ export class SolanaRPC {
           transactionsPerSecond = transactionDiff / timeDiff;
         }
         
-        console.log(`TPS calculation: ${transactionDiff} transactions in ${timeDiff.toFixed(1)}s = ${transactionsPerSecond.toFixed(2)} TPS`);
+        console.debug(`TPS calculation: ${transactionDiff} transactions in ${timeDiff.toFixed(1)}s = ${transactionsPerSecond.toFixed(2)} TPS`);
       } else {
-        console.log('First TPS calculation - no previous data available');
+        console.debug('First TPS calculation - no previous data available');
       }
       
       // Update tracking variables for next call

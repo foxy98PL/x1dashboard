@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { solanaRPC } from '@/lib/solana';
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   const requestId = Math.random().toString(36).substring(7);
   const startTime = Date.now();
   
-  console.log(`[${requestId}] Ping API called at ${new Date().toISOString()}`);
+  console.debug(`[${requestId}] Ping API called at ${new Date().toISOString()}`);
   
   try {
-    console.log(`[${requestId}] Making RPC call to getSlot...`);
+    console.debug(`[${requestId}] Making RPC call to getSlot...`);
     const pingData = await solanaRPC.getPing();
     const timestamp = new Date().toISOString();
     const responseTime = Date.now() - startTime;
     
-    console.log(`[${requestId}] RPC call completed in ${responseTime}ms, response time: ${pingData.responseTime}ms`);
+    console.debug(`[${requestId}] RPC call completed in ${responseTime}ms, response time: ${pingData.responseTime}ms`);
     
     const response = {
       success: true,
@@ -26,7 +28,7 @@ export async function GET(request: NextRequest) {
       },
     };
     
-    console.log(`[${requestId}] Sending response:`, response);
+    console.debug(`[${requestId}] Sending response:`, response);
     
     return NextResponse.json(response, {
       headers: {
@@ -56,7 +58,7 @@ export async function GET(request: NextRequest) {
       apiResponseTime: responseTime,
     };
     
-    console.log(`[${requestId}] Sending error response:`, errorResponse);
+    console.debug(`[${requestId}] Sending error response:`, errorResponse);
     
     return NextResponse.json(errorResponse, { 
       status: 500,

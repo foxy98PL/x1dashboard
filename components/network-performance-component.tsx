@@ -29,21 +29,21 @@ interface NetworkPerformanceComponentProps {
 async function fetchPing(): Promise<PingData> {
   const fetchId = Math.random().toString(36).substring(7);
   
-  console.log(`[${fetchId}] Fetching ping data`);
+  console.debug(`[${fetchId}] Fetching ping data`);
   
   const url = `/api/ping?t=${Date.now()}`;
-  console.log(`[${fetchId}] Fetch URL: ${url}`);
+  console.debug(`[${fetchId}] Fetch URL: ${url}`);
   
   try {
     const response = await fetch(url);
-    console.log(`[${fetchId}] Fetch response status: ${response.status}`);
+    console.debug(`[${fetchId}] Fetch response status: ${response.status}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log(`[${fetchId}] Fetch data:`, data);
+    console.debug(`[${fetchId}] Fetch data:`, data);
     return data.data;
   } catch (error) {
     console.error(`[${fetchId}] Fetch error:`, error);
@@ -54,21 +54,21 @@ async function fetchPing(): Promise<PingData> {
 async function fetchGas(): Promise<GasData> {
   const fetchId = Math.random().toString(36).substring(7);
   
-  console.log(`[${fetchId}] Fetching gas data`);
+  console.debug(`[${fetchId}] Fetching gas data`);
   
   const url = `/api/gas?t=${Date.now()}`;
-  console.log(`[${fetchId}] Fetch URL: ${url}`);
+  console.debug(`[${fetchId}] Fetch URL: ${url}`);
   
   try {
     const response = await fetch(url);
-    console.log(`[${fetchId}] Fetch response status: ${response.status}`);
+    console.debug(`[${fetchId}] Fetch response status: ${response.status}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log(`[${fetchId}] Fetch data:`, data);
+    console.debug(`[${fetchId}] Fetch data:`, data);
     return data.data;
   } catch (error) {
     console.error(`[${fetchId}] Fetch error:`, error);
@@ -112,7 +112,7 @@ export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerforma
       // Log ping data when it changes
       React.useEffect(() => {
         if (ping) {
-          console.log(`[Ping] Data received:`, {
+          console.debug(`[Ping] Data received:`, {
             responseTime: ping.responseTime + 'ms',
             timestamp: ping.timestamp,
             requestId: ping.requestId,
@@ -125,7 +125,7 @@ export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerforma
       // Log gas data when it changes
       React.useEffect(() => {
         if (gas) {
-          console.log(`[Gas] Data received:`, {
+          console.debug(`[Gas] Data received:`, {
             normal: gas.normal.toFixed(8) + ' XNT',
             fast: gas.fast.toFixed(8) + ' XNT',
             timestamp: gas.timestamp,

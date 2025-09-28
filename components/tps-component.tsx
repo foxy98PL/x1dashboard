@@ -22,21 +22,21 @@ interface TPSComponentProps {
 async function fetchTransactions(): Promise<TransactionData> {
   const fetchId = Math.random().toString(36).substring(7);
   
-  console.log(`[${fetchId}] Fetching transactions data`);
+  console.debug(`[${fetchId}] Fetching transactions data`);
   
   const url = `/api/transactions?t=${Date.now()}`;
-  console.log(`[${fetchId}] Fetch URL: ${url}`);
+  console.debug(`[${fetchId}] Fetch URL: ${url}`);
   
   try {
     const response = await fetch(url);
-    console.log(`[${fetchId}] Fetch response status: ${response.status}`);
+    console.debug(`[${fetchId}] Fetch response status: ${response.status}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log(`[${fetchId}] Fetch data:`, data);
+    console.debug(`[${fetchId}] Fetch data:`, data);
     return data.data;
   } catch (error) {
     console.error(`[${fetchId}] Fetch error:`, error);
@@ -63,7 +63,7 @@ export function TPSComponent({ onRefreshUpdate }: TPSComponentProps) {
       // Log data when it changes
       React.useEffect(() => {
         if (transactions) {
-          console.log(`[TPS] Data received:`, {
+          console.debug(`[TPS] Data received:`, {
             tps: transactions.transactionsPerSecond,
             total: transactions.totalTransactions.toLocaleString(),
             timestamp: transactions.timestamp,

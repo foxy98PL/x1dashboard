@@ -28,21 +28,21 @@ interface EpochComponentProps {
 async function fetchEpoch(): Promise<EpochData> {
   const fetchId = Math.random().toString(36).substring(7);
   
-  console.log(`[${fetchId}] Fetching epoch data`);
+  console.debug(`[${fetchId}] Fetching epoch data`);
   
   const url = `/api/epoch?t=${Date.now()}`;
-  console.log(`[${fetchId}] Fetch URL: ${url}`);
+  console.debug(`[${fetchId}] Fetch URL: ${url}`);
   
   try {
     const response = await fetch(url);
-    console.log(`[${fetchId}] Fetch response status: ${response.status}`);
+    console.debug(`[${fetchId}] Fetch response status: ${response.status}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log(`[${fetchId}] Fetch data:`, data);
+    console.debug(`[${fetchId}] Fetch data:`, data);
     return data.data;
   } catch (error) {
     console.error(`[${fetchId}] Fetch error:`, error);
@@ -74,7 +74,7 @@ export function EpochComponent({ onRefreshUpdate }: EpochComponentProps) {
       // Log data when it changes
       React.useEffect(() => {
         if (epoch) {
-          console.log(`[Epoch] Data received:`, {
+          console.debug(`[Epoch] Data received:`, {
             epoch: epoch.epoch,
             progress: epoch.epochProgress.toFixed(1) + '%',
             timestamp: epoch.timestamp,
