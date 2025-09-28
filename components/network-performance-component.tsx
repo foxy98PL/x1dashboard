@@ -27,53 +27,33 @@ interface NetworkPerformanceComponentProps {
 }
 
 async function fetchPing(): Promise<PingData> {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const fetchId = Math.random().toString(36).substring(7);
   
-  if (isProduction) {
-    // Aggressive cache-busting for production
-    const timestamp = Date.now();
-    const randomId = Math.random().toString(36).substring(7);
-    const response = await fetch(`/api/ping?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
-    });
-    const data = await response.json();
-    return data.data;
-  } else {
-    // Normal fetch for local development
-    const response = await fetch(`/api/ping?t=${Date.now()}`);
-    const data = await response.json();
-    return data.data;
-  }
+  console.log(`[${fetchId}] Fetching ping data`);
+  
+  const url = `/api/ping?t=${Date.now()}`;
+  console.log(`[${fetchId}] Fetch URL: ${url}`);
+  
+  const response = await fetch(url);
+  console.log(`[${fetchId}] Fetch response status: ${response.status}`);
+  const data = await response.json();
+  console.log(`[${fetchId}] Fetch data:`, data);
+  return data.data;
 }
 
 async function fetchGas(): Promise<GasData> {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const fetchId = Math.random().toString(36).substring(7);
   
-  if (isProduction) {
-    // Aggressive cache-busting for production
-    const timestamp = Date.now();
-    const randomId = Math.random().toString(36).substring(7);
-    const response = await fetch(`/api/gas?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
-    });
-    const data = await response.json();
-    return data.data;
-  } else {
-    // Normal fetch for local development
-    const response = await fetch(`/api/gas?t=${Date.now()}`);
-    const data = await response.json();
-    return data.data;
-  }
+  console.log(`[${fetchId}] Fetching gas data`);
+  
+  const url = `/api/gas?t=${Date.now()}`;
+  console.log(`[${fetchId}] Fetch URL: ${url}`);
+  
+  const response = await fetch(url);
+  console.log(`[${fetchId}] Fetch response status: ${response.status}`);
+  const data = await response.json();
+  console.log(`[${fetchId}] Fetch data:`, data);
+  return data.data;
 }
 
 function formatPingTime(ms: number): string {
@@ -96,35 +76,21 @@ function getPingStatus(responseTime: number): { label: string; color: string } {
 }
 
 export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerformanceComponentProps) {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const [refreshKey, setRefreshKey] = React.useState(0);
+  const { data: ping, isLoading: pingLoading, error: pingError } = useQuery({
+    queryKey: ['ping-combined'],
+    queryFn: fetchPing,
+    refetchInterval: 5000, // Always use 5 second interval
+    staleTime: 0, // Always fetch fresh data
+    refetchOnWindowFocus: false,
+  });
 
-  // Force refresh every 5 seconds by updating the query key (production only)
-  React.useEffect(() => {
-    if (!isProduction) return;
-    
-    const interval = setInterval(() => {
-      setRefreshKey(prev => prev + 1);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [isProduction]);
-
-      const { data: ping, isLoading: pingLoading, error: pingError } = useQuery({
-        queryKey: isProduction ? [`ping-combined-${refreshKey}`, Date.now()] : ['ping-combined'],
-        queryFn: fetchPing,
-        refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
-        staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
-        refetchOnWindowFocus: false,
-      });
-
-      const { data: gas, isLoading: gasLoading, error: gasError } = useQuery({
-        queryKey: isProduction ? [`gas-combined-${refreshKey}`, Date.now()] : ['gas-combined'],
-        queryFn: fetchGas,
-        refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
-        staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
-        refetchOnWindowFocus: false,
-      });
+  const { data: gas, isLoading: gasLoading, error: gasError } = useQuery({
+    queryKey: ['gas-combined'],
+    queryFn: fetchGas,
+    refetchInterval: 5000, // Always use 5 second interval
+    staleTime: 0, // Always fetch fresh data
+    refetchOnWindowFocus: false,
+  });
 
       // Log ping data when it changes (but not too frequently)
       React.useEffect(() => {

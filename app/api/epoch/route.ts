@@ -5,27 +5,15 @@ export async function GET(request: NextRequest) {
   const requestId = Math.random().toString(36).substring(7);
   const startTime = Date.now();
   
-  // Only log every 30 seconds to avoid spam
-  const now = Date.now();
-  const lastLog = global.lastEpochLog || 0;
-  const shouldLog = now - lastLog > 30000;
-  
-  if (shouldLog) {
-    console.log(`[${requestId}] Epoch API called at ${new Date().toISOString()}`);
-    global.lastEpochLog = now;
-  }
+  console.log(`[${requestId}] Epoch API called at ${new Date().toISOString()}`);
   
   try {
-    if (shouldLog) {
-      console.log(`[${requestId}] Making RPC call to getEpochInfo...`);
-    }
+    console.log(`[${requestId}] Making RPC call to getEpochInfo...`);
     const epochInfo = await solanaRPC.getEpochInfo();
     const timestamp = new Date().toISOString();
     const responseTime = Date.now() - startTime;
     
-    if (shouldLog) {
-      console.log(`[${requestId}] RPC call completed in ${responseTime}ms, epoch: ${epochInfo.epoch}, progress: ${epochInfo.epochProgress.toFixed(1)}%`);
-    }
+    console.log(`[${requestId}] RPC call completed in ${responseTime}ms, epoch: ${epochInfo.epoch}, progress: ${epochInfo.epochProgress.toFixed(1)}%`);
     
     const response = {
       success: true,
@@ -45,9 +33,7 @@ export async function GET(request: NextRequest) {
       },
     };
     
-    if (shouldLog) {
-      console.log(`[${requestId}] Sending response:`, response);
-    }
+    console.log(`[${requestId}] Sending response:`, response);
     
     return NextResponse.json(response, {
       headers: {

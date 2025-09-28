@@ -26,43 +26,18 @@ interface EpochComponentProps {
 }
 
 async function fetchEpoch(): Promise<EpochData> {
-  const isProduction = process.env.NODE_ENV === 'production';
   const fetchId = Math.random().toString(36).substring(7);
   
-  console.log(`[${fetchId}] Fetching epoch data (production: ${isProduction})`);
+  console.log(`[${fetchId}] Fetching epoch data`);
   
-  if (isProduction) {
-    // Aggressive cache-busting for production
-    const timestamp = Date.now();
-    const randomId = Math.random().toString(36).substring(7);
-    const url = `/api/epoch?t=${timestamp}&r=${randomId}&_=${timestamp}`;
-    
-    console.log(`[${fetchId}] Production fetch URL: ${url}`);
-    
-    const response = await fetch(url, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
-    });
-    
-    console.log(`[${fetchId}] Production fetch response status: ${response.status}`);
-    const data = await response.json();
-    console.log(`[${fetchId}] Production fetch data:`, data);
-    return data.data;
-  } else {
-    // Normal fetch for local development
-    const url = `/api/epoch?t=${Date.now()}`;
-    console.log(`[${fetchId}] Local fetch URL: ${url}`);
-    
-    const response = await fetch(url);
-    console.log(`[${fetchId}] Local fetch response status: ${response.status}`);
-    const data = await response.json();
-    console.log(`[${fetchId}] Local fetch data:`, data);
-    return data.data;
-  }
+  const url = `/api/epoch?t=${Date.now()}`;
+  console.log(`[${fetchId}] Fetch URL: ${url}`);
+  
+  const response = await fetch(url);
+  console.log(`[${fetchId}] Fetch response status: ${response.status}`);
+  const data = await response.json();
+  console.log(`[${fetchId}] Fetch data:`, data);
+  return data.data;
 }
 
 function formatTimeRemaining(ms: number): string {
@@ -78,27 +53,13 @@ function formatTimeRemaining(ms: number): string {
 }
 
 export function EpochComponent({ onRefreshUpdate }: EpochComponentProps) {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const [refreshKey, setRefreshKey] = React.useState(0);
-
-  // Force refresh every 5 seconds by updating the query key (production only)
-  React.useEffect(() => {
-    if (!isProduction) return;
-    
-    const interval = setInterval(() => {
-      setRefreshKey(prev => prev + 1);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [isProduction]);
-
-      const { data: epoch, isLoading, error } = useQuery({
-        queryKey: isProduction ? [`epoch-component-${refreshKey}`, Date.now()] : ['epoch-component'],
-        queryFn: fetchEpoch,
-        refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
-        staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
-        refetchOnWindowFocus: false,
-      });
+  const { data: epoch, isLoading, error } = useQuery({
+    queryKey: ['epoch-component'],
+    queryFn: fetchEpoch,
+    refetchInterval: 5000, // Always use 5 second interval
+    staleTime: 0, // Always fetch fresh data
+    refetchOnWindowFocus: false,
+  });
 
       // Log data when it changes (but not too frequently)
       React.useEffect(() => {
