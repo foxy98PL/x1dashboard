@@ -92,42 +92,30 @@ export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerforma
     refetchOnWindowFocus: false,
   });
 
-      // Log ping data when it changes (but not too frequently)
+      // Log ping data when it changes
       React.useEffect(() => {
         if (ping) {
-          // Only log every 30 seconds to avoid spam
-          const now = Date.now();
-          const lastLog = localStorage.getItem('ping-last-log');
-          if (!lastLog || now - parseInt(lastLog) > 30000) {
-            console.log(`[Ping] Data received:`, {
-              responseTime: ping.responseTime,
-              timestamp: ping.timestamp,
-              requestId: ping.requestId,
-              apiResponseTime: ping.apiResponseTime,
-              refreshId: ping.refreshId,
-            });
-            localStorage.setItem('ping-last-log', now.toString());
-          }
+          console.log(`[Ping] Data received:`, {
+            responseTime: ping.responseTime + 'ms',
+            timestamp: ping.timestamp,
+            requestId: ping.requestId,
+            apiResponseTime: ping.apiResponseTime,
+            refreshId: ping.refreshId,
+          });
         }
       }, [ping]);
 
-      // Log gas data when it changes (but not too frequently)
+      // Log gas data when it changes
       React.useEffect(() => {
         if (gas) {
-          // Only log every 30 seconds to avoid spam
-          const now = Date.now();
-          const lastLog = localStorage.getItem('gas-last-log');
-          if (!lastLog || now - parseInt(lastLog) > 30000) {
-            console.log(`[Gas] Data received:`, {
-              normal: gas.normal,
-              fast: gas.fast,
-              timestamp: gas.timestamp,
-              requestId: gas.requestId,
-              apiResponseTime: gas.apiResponseTime,
-              refreshId: gas.refreshId,
-            });
-            localStorage.setItem('gas-last-log', now.toString());
-          }
+          console.log(`[Gas] Data received:`, {
+            normal: gas.normal.toFixed(8) + ' XNT',
+            fast: gas.fast.toFixed(8) + ' XNT',
+            timestamp: gas.timestamp,
+            requestId: gas.requestId,
+            apiResponseTime: gas.apiResponseTime,
+            refreshId: gas.refreshId,
+          });
         }
       }, [gas]);
 
