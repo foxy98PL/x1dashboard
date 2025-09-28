@@ -21,13 +21,31 @@ interface NetworkPerformanceComponentProps {
 }
 
 async function fetchPing(): Promise<PingData> {
-  const response = await fetch(`/api/ping?t=${Date.now()}`);
+  const timestamp = Date.now();
+  const randomId = Math.random().toString(36).substring(7);
+  const response = await fetch(`/api/ping?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
+    cache: 'no-store',
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  });
   const data = await response.json();
   return data.data;
 }
 
 async function fetchGas(): Promise<GasData> {
-  const response = await fetch(`/api/gas?t=${Date.now()}`);
+  const timestamp = Date.now();
+  const randomId = Math.random().toString(36).substring(7);
+  const response = await fetch(`/api/gas?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
+    cache: 'no-store',
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  });
   const data = await response.json();
   return data.data;
 }
@@ -52,18 +70,27 @@ function getPingStatus(responseTime: number): { label: string; color: string } {
 }
 
 export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerformanceComponentProps) {
+  const [refreshKey, setRefreshKey] = React.useState(0);
+
+  // Force refresh every 5 seconds by updating the query key
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey(prev => prev + 1);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const { data: ping, isLoading: pingLoading } = useQuery({
-    queryKey: ['ping-combined'],
+    queryKey: [`ping-combined-${refreshKey}`, Date.now()],
     queryFn: fetchPing,
-    refetchInterval: 5000, // 5 seconds
     staleTime: 0, // Always consider data stale
     refetchOnWindowFocus: false,
   });
 
   const { data: gas, isLoading: gasLoading } = useQuery({
-    queryKey: ['gas-combined'],
+    queryKey: [`gas-combined-${refreshKey}`, Date.now()],
     queryFn: fetchGas,
-    refetchInterval: 5000, // 5 seconds
     staleTime: 0, // Always consider data stale
     refetchOnWindowFocus: false,
   });

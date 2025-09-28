@@ -17,7 +17,16 @@ interface TPSComponentProps {
 }
 
 async function fetchTransactions(): Promise<TransactionData> {
-  const response = await fetch(`/api/transactions?t=${Date.now()}`);
+  const timestamp = Date.now();
+  const randomId = Math.random().toString(36).substring(7);
+  const response = await fetch(`/api/transactions?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
+    cache: 'no-store',
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  });
   const data = await response.json();
   return data.data;
 }
@@ -30,10 +39,20 @@ function formatNumber(num: number): string {
 }
 
 export function TPSComponent({ onRefreshUpdate }: TPSComponentProps) {
+  const [refreshKey, setRefreshKey] = React.useState(0);
+
+  // Force refresh every 5 seconds by updating the query key
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey(prev => prev + 1);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const { data: transactions, isLoading } = useQuery({
-    queryKey: ['tps-component'],
+    queryKey: [`tps-component-${refreshKey}`, Date.now()],
     queryFn: fetchTransactions,
-    refetchInterval: 5000, // 5 seconds
     staleTime: 0, // Always consider data stale
     refetchOnWindowFocus: false,
   });

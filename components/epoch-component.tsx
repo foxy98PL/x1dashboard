@@ -23,7 +23,16 @@ interface EpochComponentProps {
 }
 
 async function fetchEpoch(): Promise<EpochData> {
-  const response = await fetch(`/api/epoch?t=${Date.now()}`);
+  const timestamp = Date.now();
+  const randomId = Math.random().toString(36).substring(7);
+  const response = await fetch(`/api/epoch?t=${timestamp}&r=${randomId}&_=${timestamp}`, {
+    cache: 'no-store',
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  });
   const data = await response.json();
   return data.data;
 }
@@ -41,10 +50,20 @@ function formatTimeRemaining(ms: number): string {
 }
 
 export function EpochComponent({ onRefreshUpdate }: EpochComponentProps) {
+  const [refreshKey, setRefreshKey] = React.useState(0);
+
+  // Force refresh every 5 seconds by updating the query key
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey(prev => prev + 1);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const { data: epoch, isLoading } = useQuery({
-    queryKey: ['epoch-component'],
+    queryKey: [`epoch-component-${refreshKey}`, Date.now()],
     queryFn: fetchEpoch,
-    refetchInterval: 5000, // 5 seconds
     staleTime: 0, // Always consider data stale
     refetchOnWindowFocus: false,
   });
