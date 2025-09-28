@@ -43,11 +43,11 @@ export function MainLayout() {
   const renderCurrentView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard onRefreshUpdate={handleRefreshUpdate} />;
+        return <Dashboard />;
       case 'validators':
         return <ValidatorsPage />;
       default:
-        return <Dashboard onRefreshUpdate={handleRefreshUpdate} />;
+        return <Dashboard/>;
     }
   };
 

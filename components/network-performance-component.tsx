@@ -96,7 +96,7 @@ export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerforma
   const { data: ping, isLoading: pingLoading, error: pingError } = useQuery({
     queryKey: ['ping-combined'],
     queryFn: fetchPing,
-    refetchInterval: 5000, // Always use 5 second interval
+  
     staleTime: 0, // Always fetch fresh data
     refetchOnWindowFocus: false,
   });
@@ -104,7 +104,7 @@ export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerforma
   const { data: gas, isLoading: gasLoading, error: gasError } = useQuery({
     queryKey: ['gas-combined'],
     queryFn: fetchGas,
-    refetchInterval: 5000, // Always use 5 second interval
+  
     staleTime: 0, // Always fetch fresh data
     refetchOnWindowFocus: false,
   });

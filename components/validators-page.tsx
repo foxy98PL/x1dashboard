@@ -77,13 +77,13 @@ export function ValidatorsPage() {
   const [showDelinquent, setShowDelinquent] = useState(false);
   const validatorsPerPage = 25;
 
-  const { data: validatorsData, isLoading, error } = useQuery({
+  const { data: validatorsData, isLoading } = useQuery<ValidatorsData>({
     queryKey: ['validators'],
     queryFn: fetchAllValidators,
-    staleTime: Infinity, // Never consider data stale - fetch only once
-    refetchOnWindowFocus: false, // Don't refetch when window gains focus
-    refetchOnMount: false, // Don't refetch when component mounts if data exists
-    refetchOnReconnect: false, // Don't refetch when reconnecting
+    staleTime: Infinity,       // dane nigdy nie są przestarzałe  // przechowuj dane w cache na zawsze
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 
   if (isLoading) {
@@ -113,12 +113,8 @@ export function ValidatorsPage() {
   // Filter and sort validators
   const filteredValidators = validatorsData.validators.filter(validator => {
     const matchesSearch = validator.identity.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         validator.voteAccount.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // When showDelinquent is true, show only delinquent validators
-    // When showDelinquent is false, show only active validators
+                          validator.voteAccount.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDelinquentFilter = showDelinquent ? validator.delinquent === true : validator.delinquent !== true;
-    
     return matchesSearch && matchesDelinquentFilter;
   });
 
@@ -134,89 +130,45 @@ export function ValidatorsPage() {
         return b.totalCredits - a.totalCredits;
     }
   });
-  
+
   const totalPages = Math.ceil(sortedValidators.length / validatorsPerPage);
   const startIndex = (currentPage - 1) * validatorsPerPage;
   const endIndex = startIndex + validatorsPerPage;
   const currentValidators = sortedValidators.slice(startIndex, endIndex);
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
-  };
-
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortBy(e.target.value as 'credits' | 'staked' | 'airdrop');
-    setCurrentPage(1);
-  };
-
   return (
     <div className="p-6">
       <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8"
-        >
-          <h1 className="text-4xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100 tracking-tight">
-            Validators Network
-          </h1>
-          <p className="text-center text-slate-600 dark:text-slate-400 text-base">
-            Detailed validator information and performance metrics
-          </p>
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-8">
+          <h1 className="text-4xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100 tracking-tight">Validators Network</h1>
+          <p className="text-center text-slate-600 dark:text-slate-400 text-base">Detailed validator information and performance metrics</p>
         </motion.div>
 
         {/* Summary Stats */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="mb-8"
-        >
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-8">
           <Card className="border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
-                <Users className="h-5 w-5 text-blue-600" />
-                Network Overview
+                <Users className="h-5 w-5 text-blue-600" /> Network Overview
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-lg border border-blue-200 dark:border-blue-700">
-                  <div className="text-2xl font-bold text-blue-700 dark:text-blue-300 mb-1">
-                    {validatorsData.stats.total}
-                  </div>
+                  <div className="text-2xl font-bold text-blue-700 dark:text-blue-300 mb-1">{validatorsData.stats.total}</div>
                   <div className="text-sm font-medium text-blue-600 dark:text-blue-400">Total Validators</div>
                 </div>
                 <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30 rounded-lg border border-emerald-200 dark:border-emerald-700">
-                  <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">
-                    {formatCommission(validatorsData.stats.average)}
-                  </div>
+                  <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">{formatCommission(validatorsData.stats.average)}</div>
                   <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Avg Commission</div>
                 </div>
                 <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-lg border border-purple-200 dark:border-purple-700">
-                  <div className="text-2xl font-bold text-purple-700 dark:text-purple-300 mb-1">
-                    {formatNumber(validatorsData.stats.totalCredits)}
-                  </div>
+                  <div className="text-2xl font-bold text-purple-700 dark:text-purple-300 mb-1">{formatNumber(validatorsData.stats.totalCredits)}</div>
                   <div className="text-sm font-medium text-purple-600 dark:text-purple-400">Total Credits</div>
                 </div>
                 <div className="text-center p-4 bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/30 dark:to-rose-800/30 rounded-lg border border-rose-200 dark:border-rose-700">
-                  <div className="text-2xl font-bold text-rose-700 dark:text-rose-300 mb-1">
-                    {formatXNT(validatorsData.stats.totalPotentialAirdrop)}
-                  </div>
+                  <div className="text-2xl font-bold text-rose-700 dark:text-rose-300 mb-1">{formatXNT(validatorsData.stats.totalPotentialAirdrop)}</div>
                   <div className="text-sm font-medium text-rose-600 dark:text-rose-400">Total Airdrop</div>
                 </div>
               </div>
@@ -224,13 +176,8 @@ export function ValidatorsPage() {
           </Card>
         </motion.div>
 
-        {/* Search and Sort Controls */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
-          className="mb-6"
-        >
+        {/* Search, Sort, Toggle */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }} className="mb-6">
           <Card className="border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
             <CardContent className="p-6">
               <div className="flex flex-col sm:flex-row gap-4 items-center">
@@ -241,17 +188,17 @@ export function ValidatorsPage() {
                       type="text"
                       placeholder="Search by validator address..."
                       value={searchTerm}
-                      onChange={handleSearchChange}
+                      onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                       className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <ArrowUpDown className="h-4 w-4 text-slate-400" />
                   <select
                     value={sortBy}
-                    onChange={handleSortChange}
+                    onChange={(e) => { setSortBy(e.target.value as 'credits' | 'staked' | 'airdrop'); setCurrentPage(1); }}
                     className="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="credits">Sort by Credits</option>
@@ -262,59 +209,32 @@ export function ValidatorsPage() {
 
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-3">
-                    <span className={`text-sm font-medium transition-colors ${!showDelinquent ? 'text-slate-800 dark:text-slate-200' : 'text-slate-500 dark:text-slate-400'}`}>
-                      Active Only
-                    </span>
-                    
+                    <span className={`text-sm font-medium transition-colors ${!showDelinquent ? 'text-slate-800 dark:text-slate-200' : 'text-slate-500 dark:text-slate-400'}`}>Active Only</span>
                     <button
                       type="button"
-                      onClick={() => {
-                        setShowDelinquent(!showDelinquent);
-                        setCurrentPage(1);
-                      }}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                        showDelinquent 
-                          ? 'bg-red-600 dark:bg-red-500' 
-                          : 'bg-blue-600 dark:bg-blue-500'
-                      }`}
+                      onClick={() => { setShowDelinquent(!showDelinquent); setCurrentPage(1); }}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${showDelinquent ? 'bg-red-600 dark:bg-red-500' : 'bg-blue-600 dark:bg-blue-500'}`}
                     >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          showDelinquent ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showDelinquent ? 'translate-x-6' : 'translate-x-1'}`} />
                     </button>
-                    
-                    <span className={`text-sm font-medium transition-colors ${showDelinquent ? 'text-slate-800 dark:text-slate-200' : 'text-slate-500 dark:text-slate-400'}`}>
-                      Delinquent Only
-                    </span>
+                    <span className={`text-sm font-medium transition-colors ${showDelinquent ? 'text-slate-800 dark:text-slate-200' : 'text-slate-500 dark:text-slate-400'}`}>Delinquent Only</span>
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-4 text-sm text-slate-600 dark:text-slate-400">
                 Showing {filteredValidators.length} of {validatorsData.validators.length} validators
-                {searchTerm && (
-                  <span className="ml-2 text-blue-600 dark:text-blue-400">
-                    (filtered by "{searchTerm}")
-                  </span>
-                )}
+                {searchTerm && <span className="ml-2 text-blue-600 dark:text-blue-400">(filtered by "{searchTerm}")</span>}
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
         {/* Validators Table */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
           <Card className="border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-                Validators List
-              </CardTitle>
+              <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-100">Validators List</CardTitle>
               <CardDescription className="text-slate-600 dark:text-slate-400">
                 Showing {startIndex + 1}-{Math.min(endIndex, sortedValidators.length)} of {sortedValidators.length} validators
               </CardDescription>
@@ -350,62 +270,33 @@ export function ValidatorsPage() {
                               <div className="font-medium text-slate-800 dark:text-slate-200 text-sm truncate">
                                 {formatAddress(validator.identity)}
                                 {validator.delinquent && (
-                                  <Badge variant="outline" className="ml-2 text-xs border-red-200 text-red-700 dark:border-red-700 dark:text-red-400">
-                                    Delinquent
-                                  </Badge>
+                                  <Badge variant="outline" className="ml-2 text-xs border-red-200 text-red-700 dark:border-red-700 dark:text-red-400">Delinquent</Badge>
                                 )}
                               </div>
                               <div className="flex items-center gap-2 mt-1">
-                                <button
-                                  onClick={() => copyToClipboard(validator.identity)}
-                                  className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                                >
+                                <button onClick={() => copyToClipboard(validator.identity)} className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
                                   <Copy className="h-3 w-3" />
                                 </button>
-                                <a
-                                  href={`https://explorer.x1.xyz/address/${validator.identity}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs text-blue-500 hover:text-blue-700"
-                                >
+                                <a href={`https://explorer.x1.xyz/address/${validator.identity}`} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:text-blue-700">
                                   <ExternalLink className="h-3 w-3" />
                                 </a>
                               </div>
                             </div>
                           </div>
                         </td>
+                        <td className="py-3 px-2 text-sm font-medium text-slate-800 dark:text-slate-200">{formatXNT(validator.activatedStake)}</td>
                         <td className="py-3 px-2">
-                          <div className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                            {formatXNT(validator.activatedStake)}
-                          </div>
-                        </td>
-                        <td className="py-3 px-2">
-                          <Badge 
-                            variant="outline" 
-                            className={`text-xs ${
-                              validator.commission < 5 ? 'border-emerald-200 text-emerald-700 dark:border-emerald-700 dark:text-emerald-400' :
-                              validator.commission < 10 ? 'border-amber-200 text-amber-700 dark:border-amber-700 dark:text-amber-400' :
-                              'border-red-200 text-red-700 dark:border-red-700 dark:text-red-400'
-                            }`}
-                          >
+                          <Badge variant="outline" className={`text-xs ${
+                            validator.commission < 5 ? 'border-emerald-200 text-emerald-700 dark:border-emerald-700 dark:text-emerald-400' :
+                            validator.commission < 10 ? 'border-amber-200 text-amber-700 dark:border-amber-700 dark:text-amber-400' :
+                            'border-red-200 text-red-700 dark:border-red-700 dark:text-red-400'
+                          }`}>
                             {formatCommission(validator.commission)}
                           </Badge>
                         </td>
-                        <td className="py-3 px-2">
-                          <div className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                            {formatNumber(validator.totalCredits)}
-                          </div>
-                        </td>
-                        <td className="py-3 px-2">
-                          <div className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                            {formatXNT(validator.potentialAirdrop)}
-                          </div>
-                        </td>
-                        <td className="py-3 px-2">
-                          <div className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                            {formatXNT(validator.potentialAirdrop * 0.1)}
-                          </div>
-                        </td>
+                        <td className="py-3 px-2 text-sm font-medium text-slate-800 dark:text-slate-200">{formatNumber(validator.totalCredits)}</td>
+                        <td className="py-3 px-2 text-sm font-medium text-slate-800 dark:text-slate-200">{formatXNT(validator.potentialAirdrop)}</td>
+                        <td className="py-3 px-2 text-sm font-medium text-slate-800 dark:text-slate-200">{formatXNT(validator.potentialAirdrop * 0.1)}</td>
                       </motion.tr>
                     ))}
                   </tbody>
@@ -419,27 +310,17 @@ export function ValidatorsPage() {
                     Page {currentPage} of {totalPages}
                   </div>
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={handlePreviousPage}
-                      disabled={currentPage === 1}
-                      className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                      Previous
+                    <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                      <ChevronLeft className="h-4 w-4" /> Previous
                     </button>
-                    <button
-                      onClick={handleNextPage}
-                      disabled={currentPage === totalPages}
-                      className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      Next
-                      <ChevronRight className="h-4 w-4" />
+                    <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages} className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                      Next <ChevronRight className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* No Results Message */}
+              {/* No Results */}
               {sortedValidators.length === 0 && (
                 <div className="text-center py-12">
                   <div className="text-slate-500 dark:text-slate-400 text-lg mb-2">No validators found</div>

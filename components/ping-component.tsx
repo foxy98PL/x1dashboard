@@ -37,7 +37,6 @@ export function PingComponent({ onRefreshUpdate }: PingComponentProps) {
   const { data: ping, isLoading } = useQuery({
     queryKey: ['ping-component'],
     queryFn: fetchPing,
-    refetchInterval: 5000, // 5 seconds
     staleTime: 0, // Always consider data stale
     refetchOnWindowFocus: false,
   });

@@ -33,7 +33,7 @@ export function NetworkStatsComponent({ onRefreshUpdate }: NetworkStatsComponent
   const { data: gas, isLoading } = useQuery({
     queryKey: ['gas-component'],
     queryFn: fetchGas,
-    refetchInterval: 5000, // 5 seconds
+
     staleTime: 0, // Always consider data stale
     refetchOnWindowFocus: false,
   });
