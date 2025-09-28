@@ -52,6 +52,8 @@ export interface PingData {
 
 export class SolanaRPC {
   private connection: Connection;
+  private lastTransactionCount: number = 0;
+  private lastTransactionTimestamp: number = 0;
 
   constructor() {
     this.connection = new Connection(RPC_ENDPOINT, 'finalized');
@@ -113,67 +115,31 @@ export class SolanaRPC {
       // Get current epoch info
       const epochInfo = await this.connection.getEpochInfo();
       const currentTransactionCount = epochInfo.transactionCount || 0;
+      const currentTimestamp = Date.now();
       
-      // Calculate network TPS using a simpler, more reliable method
-      let networkTPS = 0;
+      // Calculate TPS based on difference from previous call
+      let transactionsPerSecond = 0;
       
-      try {
-        // Method 1: Use recent transaction signatures to estimate TPS
-        // Get recent signatures from a known program (System Program)
-        const systemProgramId = new PublicKey('11111111111111111111111111111111');
+      if (this.lastTransactionCount > 0 && this.lastTransactionTimestamp > 0) {
+        const timeDiff = (currentTimestamp - this.lastTransactionTimestamp) / 1000; // Convert to seconds
+        const transactionDiff = currentTransactionCount - this.lastTransactionCount;
         
-        try {
-          const recentSignatures = await this.connection.getSignaturesForAddress(
-            systemProgramId,
-            { limit: 50, commitment: 'finalized' }
-          );
-          
-          if (recentSignatures && recentSignatures.length > 0) {
-            // Calculate TPS based on recent signatures
-            const now = Date.now();
-            const timeWindow = 10000; // 10 seconds
-            const tenSecondsAgo = now - timeWindow;
-            
-            // Count signatures from the last 10 seconds
-            const recentCount = recentSignatures.filter(sig => {
-              const sigTime = sig.blockTime ? sig.blockTime * 1000 : 0;
-              return sigTime > tenSecondsAgo;
-            }).length;
-            
-            // Calculate TPS (this is a sample, multiply by estimated factor)
-            const sampleTPS = recentCount / (timeWindow / 1000); // transactions per second
-            const estimatedFactor = 5; // System program represents ~20% of all transactions
-            networkTPS = Math.round(sampleTPS * estimatedFactor);
-            
-            console.log(`Network TPS calculation: ${recentCount} system transactions in 10s = ${sampleTPS.toFixed(2)} tx/s × ${estimatedFactor} = ${networkTPS} TPS`);
-          }
-        } catch (signatureError) {
-          console.log('Signature-based TPS calculation failed:', signatureError);
+        if (timeDiff > 0) {
+          transactionsPerSecond = transactionDiff / timeDiff;
         }
         
-        // Method 2: Fallback calculation using epoch progress
-        if (networkTPS === 0) {
-          // Estimate based on recent transaction count changes
-          const timeWindow = 10000; // 10 seconds
-          const estimatedSlotsInWindow = timeWindow / 400; // ~25 slots
-          
-          // Use a reasonable estimate for testnet
-          const baseTestnetTPS = 20; // Base TPS for testnet
-          const variation = Math.random() * 15; // 0-15 variation
-          networkTPS = Math.round(baseTestnetTPS + variation);
-          
-          console.log(`Fallback TPS calculation: ${networkTPS} TPS (testnet estimate)`);
-        }
-        
-      } catch (error) {
-        console.log('Advanced TPS calculation failed, using fallback:', error);
-        // Final fallback: realistic testnet TPS
-        networkTPS = Math.floor(Math.random() * 25) + 10; // 10-35 TPS
+        console.log(`TPS calculation: ${transactionDiff} transactions in ${timeDiff.toFixed(1)}s = ${transactionsPerSecond.toFixed(2)} TPS`);
+      } else {
+        console.log('First TPS calculation - no previous data available');
       }
+      
+      // Update tracking variables for next call
+      this.lastTransactionCount = currentTransactionCount;
+      this.lastTransactionTimestamp = currentTimestamp;
       
       return {
         totalTransactions: currentTransactionCount,
-        transactionsPerSecond: Math.max(0, networkTPS),
+        transactionsPerSecond: Math.max(0, Math.round(transactionsPerSecond)),
         timestamp: new Date().toISOString(),
       };
     } catch (error) {
