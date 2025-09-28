@@ -47,20 +47,22 @@ export function NetworkStatsComponent({ onRefreshUpdate }: NetworkStatsComponent
 
   if (isLoading) {
     return (
-      <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-            <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            Network Performance
+      <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
+            <Zap className="h-5 w-5 text-purple-600" />
+            Gas Simulation
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400">
-            Gas simulation and pricing
+            Transaction fee estimation
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="text-2xl font-bold text-slate-400 dark:text-slate-500">
-              Loading...
+        <CardContent className="pt-0">
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-700 dark:text-purple-300 mb-2">
+                Loading...
+              </div>
             </div>
           </div>
         </CardContent>
@@ -70,20 +72,22 @@ export function NetworkStatsComponent({ onRefreshUpdate }: NetworkStatsComponent
 
   if (!gas) {
     return (
-      <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-            <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            Network Performance
+      <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
+            <Zap className="h-5 w-5 text-purple-600" />
+            Gas Simulation
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400">
-            Gas simulation and pricing
+            Transaction fee estimation
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="text-2xl font-bold text-red-500">
-              Error
+        <CardContent className="pt-0">
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-red-700 dark:text-red-300 mb-2">
+                Error
+              </div>
             </div>
           </div>
         </CardContent>
@@ -92,35 +96,40 @@ export function NetworkStatsComponent({ onRefreshUpdate }: NetworkStatsComponent
   }
 
   return (
-    <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-          <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-          Network Performance
+    <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
+          <Zap className="h-5 w-5 text-purple-600" />
+          Gas Simulation
         </CardTitle>
         <CardDescription className="text-slate-600 dark:text-slate-400">
-          Gas simulation and pricing
+          Transaction fee estimation
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
-              <div className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">Normal</div>
-              <div className="text-lg font-bold text-blue-800 dark:text-blue-200">
-                {formatGasPrice(gas.normal)}
-              </div>
-            </div>
-            <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg">
-              <div className="text-sm font-medium text-purple-700 dark:text-purple-300 mb-1">Fast</div>
-              <div className="text-lg font-bold text-purple-800 dark:text-purple-200">
-                {formatGasPrice(gas.fast)}
-              </div>
+          <div className="text-center mb-3">
+            <div className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
+              Gas Simulation
             </div>
           </div>
-          <div className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            Updated: {new Date(gas.timestamp).toLocaleTimeString()}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-lg border border-blue-200 dark:border-blue-700">
+              <div className="text-lg font-bold text-blue-700 dark:text-blue-300 mb-1">
+                {formatGasPrice(gas.normal)}
+              </div>
+              <div className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                Normal
+              </div>
+            </div>
+            <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-lg border border-purple-200 dark:border-purple-700">
+              <div className="text-lg font-bold text-purple-700 dark:text-purple-300 mb-1">
+                {formatGasPrice(gas.fast)}
+              </div>
+              <div className="text-xs font-medium text-purple-600 dark:text-purple-400">
+                Fast
+              </div>
+            </div>
           </div>
         </div>
       </CardContent>

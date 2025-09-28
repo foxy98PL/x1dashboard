@@ -51,20 +51,25 @@ export function PingComponent({ onRefreshUpdate }: PingComponentProps) {
 
   if (isLoading) {
     return (
-      <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-            <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            Network Ping
+      <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
+            <Activity className="h-5 w-5 text-red-600" />
+            Network Performance
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400">
-            RPC response time measurement
+            RPC endpoint response time monitoring
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="text-2xl font-bold text-slate-400 dark:text-slate-500">
-              Loading...
+        <CardContent className="pt-0">
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-red-700 dark:text-red-300 mb-2">
+                Loading...
+              </div>
+              <div className="text-sm font-medium text-red-600 dark:text-red-400 mb-3">
+                Response Time
+              </div>
             </div>
           </div>
         </CardContent>
@@ -74,20 +79,25 @@ export function PingComponent({ onRefreshUpdate }: PingComponentProps) {
 
   if (!ping) {
     return (
-      <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-            <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            Network Ping
+      <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
+            <Activity className="h-5 w-5 text-red-600" />
+            Network Performance
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400">
-            RPC response time measurement
+            RPC endpoint response time monitoring
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="text-2xl font-bold text-red-500">
-              Error
+        <CardContent className="pt-0">
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-red-700 dark:text-red-300 mb-2">
+                Error
+              </div>
+              <div className="text-sm font-medium text-red-600 dark:text-red-400 mb-3">
+                Response Time
+              </div>
             </div>
           </div>
         </CardContent>
@@ -98,28 +108,31 @@ export function PingComponent({ onRefreshUpdate }: PingComponentProps) {
   const pingStatus = getPingStatus(ping.responseTime);
 
   return (
-    <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-          <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          Network Ping
+    <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
+          <Activity className="h-5 w-5 text-red-600" />
+          Network Performance
         </CardTitle>
         <CardDescription className="text-slate-600 dark:text-slate-400">
-          RPC response time measurement
+          RPC endpoint response time monitoring
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          <div className="text-2xl font-bold text-slate-800 dark:text-slate-200">
-            {formatPingTime(ping.responseTime)}
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge className={`${pingStatus.color} text-white`}>
+      <CardContent className="pt-0">
+        <div className="space-y-4">
+          {/* Response Time */}
+          <div className="text-center">
+            <div className="text-3xl font-bold text-red-700 dark:text-red-300 mb-2">
+              {formatPingTime(ping.responseTime)}
+            </div>
+            <div className="text-sm font-medium text-red-600 dark:text-red-400 mb-3">
+              Response Time
+            </div>
+            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+              ping.responseTime < 100 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400' : 
+              ping.responseTime < 300 ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400' : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+            }`}>
               {pingStatus.label}
-            </Badge>
-            <div className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              Updated: {new Date(ping.timestamp).toLocaleTimeString()}
             </div>
           </div>
         </div>

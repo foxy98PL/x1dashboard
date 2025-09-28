@@ -47,20 +47,25 @@ export function TPSComponent({ onRefreshUpdate }: TPSComponentProps) {
 
   if (isLoading) {
     return (
-      <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-            Transactions
+      <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
+            <TrendingUp className="h-5 w-5 text-emerald-600" />
+            Transaction Metrics
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400">
-            Network throughput and activity
+            Network transaction volume and throughput
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            <div className="text-2xl font-bold text-slate-400 dark:text-slate-500">
-              Loading...
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-2">
+                Loading...
+              </div>
+              <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                Total Transactions
+              </div>
             </div>
           </div>
         </CardContent>
@@ -70,20 +75,25 @@ export function TPSComponent({ onRefreshUpdate }: TPSComponentProps) {
 
   if (!transactions) {
     return (
-      <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-            Transactions
+      <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
+            <TrendingUp className="h-5 w-5 text-emerald-600" />
+            Transaction Metrics
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400">
-            Network throughput and activity
+            Network transaction volume and throughput
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            <div className="text-2xl font-bold text-red-500">
-              Error
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-red-700 dark:text-red-300 mb-2">
+                Error
+              </div>
+              <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                Total Transactions
+              </div>
             </div>
           </div>
         </CardContent>
@@ -94,43 +104,35 @@ export function TPSComponent({ onRefreshUpdate }: TPSComponentProps) {
   const isLowTPS = transactions.transactionsPerSecond === 0;
 
   return (
-    <Card className={`bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200 dark:border-slate-700 transition-opacity duration-300 ${isLowTPS ? 'opacity-30' : ''}`}>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-          Transactions
+    <Card className={`h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm transition-opacity duration-300 ${isLowTPS ? 'opacity-30' : ''}`}>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
+          <TrendingUp className="h-5 w-5 text-emerald-600" />
+          Transaction Metrics
         </CardTitle>
         <CardDescription className="text-slate-600 dark:text-slate-400">
-          Network throughput and activity
+          Network transaction volume and throughput
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-3 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg">
-              <div className="text-sm font-medium text-orange-700 dark:text-orange-300 mb-1">TPS</div>
-              <div className="text-2xl font-bold text-orange-800 dark:text-orange-200">
-                {Math.round(transactions.transactionsPerSecond)}
-              </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-2">
+              {formatNumber(transactions.totalTransactions)}
             </div>
-            <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
-              <div className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">Total</div>
-              <div className="text-lg font-bold text-blue-800 dark:text-blue-200">
-                {formatNumber(transactions.totalTransactions)}
-              </div>
+            <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+              Total Transactions
             </div>
           </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Activity className="h-4 w-4 text-slate-500" />
-              <span className="text-sm text-slate-600 dark:text-slate-400">
-                Transactions per second
-              </span>
+          <div className={`text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30 rounded-lg border border-emerald-200 dark:border-emerald-700 transition-opacity duration-300 ${
+            !transactions || transactions.transactionsPerSecond === 0 ? 'opacity-30' : 'opacity-100'
+          }`}>
+            <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mb-2">
+              {transactions && transactions.transactionsPerSecond > 0 ? `${Math.round(transactions.transactionsPerSecond)} TPS` : '0 TPS'}
             </div>
-            <Badge variant="outline" className="text-xs">
-              Updated: {new Date(transactions.timestamp).toLocaleTimeString()}
-            </Badge>
+            <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+              Transactions per second
+            </div>
           </div>
         </div>
       </CardContent>

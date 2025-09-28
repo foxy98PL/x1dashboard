@@ -58,20 +58,23 @@ export function EpochComponent({ onRefreshUpdate }: EpochComponentProps) {
 
   if (isLoading) {
     return (
-      <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-green-600 dark:text-green-400" />
+      <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
+            <Calendar className="h-5 w-5 text-indigo-600" />
             Current Epoch
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400">
-            Slot progress and timing
+            Epoch progress and timing information
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            <div className="text-2xl font-bold text-slate-400 dark:text-slate-500">
-              Loading...
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-indigo-700 dark:text-indigo-300 mb-2">
+                Loading...
+              </div>
+              <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Current Epoch</div>
             </div>
           </div>
         </CardContent>
@@ -81,20 +84,23 @@ export function EpochComponent({ onRefreshUpdate }: EpochComponentProps) {
 
   if (!epoch) {
     return (
-      <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-green-600 dark:text-green-400" />
+      <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
+            <Calendar className="h-5 w-5 text-indigo-600" />
             Current Epoch
           </CardTitle>
           <CardDescription className="text-slate-600 dark:text-slate-400">
-            Slot progress and timing
+            Epoch progress and timing information
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            <div className="text-2xl font-bold text-red-500">
-              Error
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-red-700 dark:text-red-300 mb-2">
+                Error
+              </div>
+              <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Current Epoch</div>
             </div>
           </div>
         </CardContent>
@@ -103,58 +109,41 @@ export function EpochComponent({ onRefreshUpdate }: EpochComponentProps) {
   }
 
   return (
-    <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-green-600 dark:text-green-400" />
+    <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-100">
+          <Calendar className="h-5 w-5 text-indigo-600" />
           Current Epoch
         </CardTitle>
         <CardDescription className="text-slate-600 dark:text-slate-400">
-          Slot progress and timing
+          Epoch progress and timing information
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-3 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg">
-              <div className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">Epoch</div>
-              <div className="text-xl font-bold text-green-800 dark:text-green-200">
-                {epoch.epoch.toLocaleString()}
-              </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-indigo-700 dark:text-indigo-300 mb-2">
+              {epoch.epoch.toLocaleString()}
             </div>
-            <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
-              <div className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">Slot</div>
-              <div className="text-lg font-bold text-blue-800 dark:text-blue-200">
-                {epoch.slotIndex.toLocaleString()}
-              </div>
-            </div>
+            <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Current Epoch</div>
           </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm font-medium">
               <span className="text-slate-600 dark:text-slate-400">Progress</span>
-              <span className="font-medium text-slate-800 dark:text-slate-200">
-                {epoch.epochProgress.toFixed(1)}%
-              </span>
+              <span className="text-indigo-700 dark:text-indigo-300">{epoch.epochProgress.toFixed(1)}%</span>
             </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+            <div className="w-full bg-indigo-100 dark:bg-indigo-900/30 rounded-full h-3">
               <div 
-                className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-300"
+                className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-3 rounded-full transition-all duration-500"
                 style={{ width: `${epoch.epochProgress}%` }}
               />
             </div>
           </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-slate-500" />
-              <span className="text-sm text-slate-600 dark:text-slate-400">
-                {formatTimeRemaining(epoch.timeRemaining)} remaining
-              </span>
+          <div className="text-center">
+            <div className="text-lg font-semibold text-indigo-700 dark:text-indigo-300">
+              {formatTimeRemaining(epoch.timeRemaining)}
             </div>
-            <Badge variant="outline" className="text-xs">
-              Updated: {new Date(epoch.timestamp).toLocaleTimeString()}
-            </Badge>
+            <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Time Remaining</div>
           </div>
         </div>
       </CardContent>

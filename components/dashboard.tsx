@@ -9,6 +9,7 @@ import { PingComponent } from './ping-component';
 import { NetworkStatsComponent } from './network-stats-component';
 import { EpochComponent } from './epoch-component';
 import { TPSComponent } from './tps-component';
+import { NetworkPerformanceComponent } from './network-performance-component';
 
 interface SupplyData {
   total: number;
@@ -293,32 +294,20 @@ export function Dashboard({ onRefreshUpdate }: DashboardProps) {
 
           {/* Third Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Ping Card */}
+            {/* Network Performance Card */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.6 }}
             >
-              <PingComponent onRefreshUpdate={onRefreshUpdate} />
+              <NetworkPerformanceComponent onRefreshUpdate={onRefreshUpdate} />
             </motion.div>
 
-            {/* Network Stats Card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.7 }}
-            >
-              <NetworkStatsComponent onRefreshUpdate={onRefreshUpdate} />
-            </motion.div>
-          </div>
-
-          {/* Fourth Row */}
-          <div className="grid grid-cols-1 gap-4">
             {/* Staking Card */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
+              transition={{ duration: 0.5, delay: 0.7 }}
             >
               <Card className="h-full border-slate-200 dark:border-slate-700 shadow-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm">
                 <CardHeader className="pb-4">
