@@ -110,6 +110,18 @@ export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerforma
     refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
     staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
     refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      console.log(`[Ping] Data received:`, {
+        responseTime: data.responseTime,
+        timestamp: data.timestamp,
+        requestId: data.requestId,
+        apiResponseTime: data.apiResponseTime,
+        refreshId: data.refreshId,
+      });
+    },
+    onError: (error) => {
+      console.error(`[Ping] Query error:`, error);
+    },
   });
 
   const { data: gas, isLoading: gasLoading } = useQuery({
@@ -118,6 +130,19 @@ export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerforma
     refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
     staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
     refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      console.log(`[Gas] Data received:`, {
+        normal: data.normal,
+        fast: data.fast,
+        timestamp: data.timestamp,
+        requestId: data.requestId,
+        apiResponseTime: data.apiResponseTime,
+        refreshId: data.refreshId,
+      });
+    },
+    onError: (error) => {
+      console.error(`[Gas] Query error:`, error);
+    },
   });
 
   // Notify parent of refresh updates

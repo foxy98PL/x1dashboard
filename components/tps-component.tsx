@@ -69,6 +69,19 @@ export function TPSComponent({ onRefreshUpdate }: TPSComponentProps) {
     refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
     staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
     refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      console.log(`[TPS] Data received:`, {
+        tps: data.transactionsPerSecond,
+        total: data.totalTransactions,
+        timestamp: data.timestamp,
+        requestId: data.requestId,
+        apiResponseTime: data.apiResponseTime,
+        refreshId: data.refreshId,
+      });
+    },
+    onError: (error) => {
+      console.error(`[TPS] Query error:`, error);
+    },
   });
 
   // Notify parent of refresh updates
