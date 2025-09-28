@@ -63,26 +63,34 @@ export function TPSComponent({ onRefreshUpdate }: TPSComponentProps) {
     return () => clearInterval(interval);
   }, [isProduction]);
 
-  const { data: transactions, isLoading } = useQuery({
-    queryKey: isProduction ? [`tps-component-${refreshKey}`, Date.now()] : ['tps-component'],
-    queryFn: fetchTransactions,
-    refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
-    staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
-    refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      console.log(`[TPS] Data received:`, {
-        tps: data.transactionsPerSecond,
-        total: data.totalTransactions,
-        timestamp: data.timestamp,
-        requestId: data.requestId,
-        apiResponseTime: data.apiResponseTime,
-        refreshId: data.refreshId,
+      const { data: transactions, isLoading, error } = useQuery({
+        queryKey: isProduction ? [`tps-component-${refreshKey}`, Date.now()] : ['tps-component'],
+        queryFn: fetchTransactions,
+        refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
+        staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
+        refetchOnWindowFocus: false,
       });
-    },
-    onError: (error) => {
-      console.error(`[TPS] Query error:`, error);
-    },
-  });
+
+      // Log data when it changes
+      React.useEffect(() => {
+        if (transactions) {
+          console.log(`[TPS] Data received:`, {
+            tps: transactions.transactionsPerSecond,
+            total: transactions.totalTransactions,
+            timestamp: transactions.timestamp,
+            requestId: transactions.requestId,
+            apiResponseTime: transactions.apiResponseTime,
+            refreshId: transactions.refreshId,
+          });
+        }
+      }, [transactions]);
+
+      // Log errors
+      React.useEffect(() => {
+        if (error) {
+          console.error(`[TPS] Query error:`, error);
+        }
+      }, [error]);
 
   // Notify parent of refresh updates
   React.useEffect(() => {

@@ -104,46 +104,61 @@ export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerforma
     return () => clearInterval(interval);
   }, [isProduction]);
 
-  const { data: ping, isLoading: pingLoading } = useQuery({
-    queryKey: isProduction ? [`ping-combined-${refreshKey}`, Date.now()] : ['ping-combined'],
-    queryFn: fetchPing,
-    refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
-    staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
-    refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      console.log(`[Ping] Data received:`, {
-        responseTime: data.responseTime,
-        timestamp: data.timestamp,
-        requestId: data.requestId,
-        apiResponseTime: data.apiResponseTime,
-        refreshId: data.refreshId,
+      const { data: ping, isLoading: pingLoading, error: pingError } = useQuery({
+        queryKey: isProduction ? [`ping-combined-${refreshKey}`, Date.now()] : ['ping-combined'],
+        queryFn: fetchPing,
+        refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
+        staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
+        refetchOnWindowFocus: false,
       });
-    },
-    onError: (error) => {
-      console.error(`[Ping] Query error:`, error);
-    },
-  });
 
-  const { data: gas, isLoading: gasLoading } = useQuery({
-    queryKey: isProduction ? [`gas-combined-${refreshKey}`, Date.now()] : ['gas-combined'],
-    queryFn: fetchGas,
-    refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
-    staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
-    refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      console.log(`[Gas] Data received:`, {
-        normal: data.normal,
-        fast: data.fast,
-        timestamp: data.timestamp,
-        requestId: data.requestId,
-        apiResponseTime: data.apiResponseTime,
-        refreshId: data.refreshId,
+      const { data: gas, isLoading: gasLoading, error: gasError } = useQuery({
+        queryKey: isProduction ? [`gas-combined-${refreshKey}`, Date.now()] : ['gas-combined'],
+        queryFn: fetchGas,
+        refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
+        staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
+        refetchOnWindowFocus: false,
       });
-    },
-    onError: (error) => {
-      console.error(`[Gas] Query error:`, error);
-    },
-  });
+
+      // Log ping data when it changes
+      React.useEffect(() => {
+        if (ping) {
+          console.log(`[Ping] Data received:`, {
+            responseTime: ping.responseTime,
+            timestamp: ping.timestamp,
+            requestId: ping.requestId,
+            apiResponseTime: ping.apiResponseTime,
+            refreshId: ping.refreshId,
+          });
+        }
+      }, [ping]);
+
+      // Log gas data when it changes
+      React.useEffect(() => {
+        if (gas) {
+          console.log(`[Gas] Data received:`, {
+            normal: gas.normal,
+            fast: gas.fast,
+            timestamp: gas.timestamp,
+            requestId: gas.requestId,
+            apiResponseTime: gas.apiResponseTime,
+            refreshId: gas.refreshId,
+          });
+        }
+      }, [gas]);
+
+      // Log errors
+      React.useEffect(() => {
+        if (pingError) {
+          console.error(`[Ping] Query error:`, pingError);
+        }
+      }, [pingError]);
+
+      React.useEffect(() => {
+        if (gasError) {
+          console.error(`[Gas] Query error:`, gasError);
+        }
+      }, [gasError]);
 
   // Notify parent of refresh updates
   React.useEffect(() => {

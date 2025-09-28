@@ -89,26 +89,34 @@ export function EpochComponent({ onRefreshUpdate }: EpochComponentProps) {
     return () => clearInterval(interval);
   }, [isProduction]);
 
-  const { data: epoch, isLoading } = useQuery({
-    queryKey: isProduction ? [`epoch-component-${refreshKey}`, Date.now()] : ['epoch-component'],
-    queryFn: fetchEpoch,
-    refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
-    staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
-    refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      console.log(`[Epoch] Data received:`, {
-        epoch: data.epoch,
-        progress: data.epochProgress,
-        timestamp: data.timestamp,
-        requestId: data.requestId,
-        apiResponseTime: data.apiResponseTime,
-        refreshId: data.refreshId,
+      const { data: epoch, isLoading, error } = useQuery({
+        queryKey: isProduction ? [`epoch-component-${refreshKey}`, Date.now()] : ['epoch-component'],
+        queryFn: fetchEpoch,
+        refetchInterval: isProduction ? undefined : 5000, // Use normal refetch interval locally
+        staleTime: isProduction ? 0 : 30 * 1000, // Allow some caching locally
+        refetchOnWindowFocus: false,
       });
-    },
-    onError: (error) => {
-      console.error(`[Epoch] Query error:`, error);
-    },
-  });
+
+      // Log data when it changes
+      React.useEffect(() => {
+        if (epoch) {
+          console.log(`[Epoch] Data received:`, {
+            epoch: epoch.epoch,
+            progress: epoch.epochProgress,
+            timestamp: epoch.timestamp,
+            requestId: epoch.requestId,
+            apiResponseTime: epoch.apiResponseTime,
+            refreshId: epoch.refreshId,
+          });
+        }
+      }, [epoch]);
+
+      // Log errors
+      React.useEffect(() => {
+        if (error) {
+          console.error(`[Epoch] Query error:`, error);
+        }
+      }, [error]);
 
   // Notify parent of refresh updates
   React.useEffect(() => {
