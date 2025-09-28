@@ -34,11 +34,21 @@ async function fetchPing(): Promise<PingData> {
   const url = `/api/ping?t=${Date.now()}`;
   console.log(`[${fetchId}] Fetch URL: ${url}`);
   
-  const response = await fetch(url);
-  console.log(`[${fetchId}] Fetch response status: ${response.status}`);
-  const data = await response.json();
-  console.log(`[${fetchId}] Fetch data:`, data);
-  return data.data;
+  try {
+    const response = await fetch(url);
+    console.log(`[${fetchId}] Fetch response status: ${response.status}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log(`[${fetchId}] Fetch data:`, data);
+    return data.data;
+  } catch (error) {
+    console.error(`[${fetchId}] Fetch error:`, error);
+    throw error;
+  }
 }
 
 async function fetchGas(): Promise<GasData> {
@@ -49,11 +59,21 @@ async function fetchGas(): Promise<GasData> {
   const url = `/api/gas?t=${Date.now()}`;
   console.log(`[${fetchId}] Fetch URL: ${url}`);
   
-  const response = await fetch(url);
-  console.log(`[${fetchId}] Fetch response status: ${response.status}`);
-  const data = await response.json();
-  console.log(`[${fetchId}] Fetch data:`, data);
-  return data.data;
+  try {
+    const response = await fetch(url);
+    console.log(`[${fetchId}] Fetch response status: ${response.status}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log(`[${fetchId}] Fetch data:`, data);
+    return data.data;
+  } catch (error) {
+    console.error(`[${fetchId}] Fetch error:`, error);
+    throw error;
+  }
 }
 
 function formatPingTime(ms: number): string {
@@ -67,9 +87,9 @@ function formatGasPrice(num: number): string {
 }
 
 function getPingStatus(responseTime: number): { label: string; color: string } {
-  if (responseTime < 100) return { label: 'Excellent', color: 'bg-emerald-500' };
-  if (responseTime < 500) return { label: 'Good', color: 'bg-yellow-500' };
-  return { label: 'Slow', color: 'bg-red-500' };
+  if (responseTime < 100) return { label: 'Excellent', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400' };
+  if (responseTime < 500) return { label: 'Good', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400' };
+  return { label: 'Slow', color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' };
 }
 
 export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerformanceComponentProps) {
@@ -96,7 +116,7 @@ export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerforma
             responseTime: ping.responseTime + 'ms',
             timestamp: ping.timestamp,
             requestId: ping.requestId,
-            apiResponseTime: ping.apiResponseTime + 'ms',
+            apiResponseTime: (ping.apiResponseTime || 0) + 'ms',
             refreshId: ping.refreshId,
           });
         }
@@ -110,7 +130,7 @@ export function NetworkPerformanceComponent({ onRefreshUpdate }: NetworkPerforma
             fast: gas.fast.toFixed(8) + ' XNT',
             timestamp: gas.timestamp,
             requestId: gas.requestId,
-            apiResponseTime: gas.apiResponseTime,
+            apiResponseTime: (gas.apiResponseTime || 0) + 'ms',
             refreshId: gas.refreshId,
           });
         }

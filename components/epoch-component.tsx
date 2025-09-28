@@ -33,11 +33,21 @@ async function fetchEpoch(): Promise<EpochData> {
   const url = `/api/epoch?t=${Date.now()}`;
   console.log(`[${fetchId}] Fetch URL: ${url}`);
   
-  const response = await fetch(url);
-  console.log(`[${fetchId}] Fetch response status: ${response.status}`);
-  const data = await response.json();
-  console.log(`[${fetchId}] Fetch data:`, data);
-  return data.data;
+  try {
+    const response = await fetch(url);
+    console.log(`[${fetchId}] Fetch response status: ${response.status}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log(`[${fetchId}] Fetch data:`, data);
+    return data.data;
+  } catch (error) {
+    console.error(`[${fetchId}] Fetch error:`, error);
+    throw error;
+  }
 }
 
 function formatTimeRemaining(ms: number): string {
@@ -69,7 +79,7 @@ export function EpochComponent({ onRefreshUpdate }: EpochComponentProps) {
             progress: epoch.epochProgress.toFixed(1) + '%',
             timestamp: epoch.timestamp,
             requestId: epoch.requestId,
-            apiResponseTime: epoch.apiResponseTime,
+            apiResponseTime: (epoch.apiResponseTime || 0) + 'ms',
             refreshId: epoch.refreshId,
           });
         }

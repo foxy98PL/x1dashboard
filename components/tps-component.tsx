@@ -27,11 +27,21 @@ async function fetchTransactions(): Promise<TransactionData> {
   const url = `/api/transactions?t=${Date.now()}`;
   console.log(`[${fetchId}] Fetch URL: ${url}`);
   
-  const response = await fetch(url);
-  console.log(`[${fetchId}] Fetch response status: ${response.status}`);
-  const data = await response.json();
-  console.log(`[${fetchId}] Fetch data:`, data);
-  return data.data;
+  try {
+    const response = await fetch(url);
+    console.log(`[${fetchId}] Fetch response status: ${response.status}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log(`[${fetchId}] Fetch data:`, data);
+    return data.data;
+  } catch (error) {
+    console.error(`[${fetchId}] Fetch error:`, error);
+    throw error;
+  }
 }
 
 function formatNumber(num: number): string {
@@ -58,7 +68,7 @@ export function TPSComponent({ onRefreshUpdate }: TPSComponentProps) {
             total: transactions.totalTransactions.toLocaleString(),
             timestamp: transactions.timestamp,
             requestId: transactions.requestId,
-            apiResponseTime: transactions.apiResponseTime,
+            apiResponseTime: (transactions.apiResponseTime || 0) + 'ms',
             refreshId: transactions.refreshId,
           });
         }
