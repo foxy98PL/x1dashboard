@@ -74,17 +74,23 @@ export function TPSComponent({ onRefreshUpdate }: TPSComponentProps) {
         refetchOnWindowFocus: false,
       });
 
-      // Log data when it changes
+      // Log data when it changes (but not too frequently)
       React.useEffect(() => {
         if (transactions) {
-          console.log(`[TPS] Data received:`, {
-            tps: transactions.transactionsPerSecond,
-            total: transactions.totalTransactions,
-            timestamp: transactions.timestamp,
-            requestId: transactions.requestId,
-            apiResponseTime: transactions.apiResponseTime,
-            refreshId: transactions.refreshId,
-          });
+          // Only log every 30 seconds to avoid spam
+          const now = Date.now();
+          const lastLog = localStorage.getItem('tps-last-log');
+          if (!lastLog || now - parseInt(lastLog) > 30000) {
+            console.log(`[TPS] Data received:`, {
+              tps: transactions.transactionsPerSecond,
+              total: transactions.totalTransactions,
+              timestamp: transactions.timestamp,
+              requestId: transactions.requestId,
+              apiResponseTime: transactions.apiResponseTime,
+              refreshId: transactions.refreshId,
+            });
+            localStorage.setItem('tps-last-log', now.toString());
+          }
         }
       }, [transactions]);
 

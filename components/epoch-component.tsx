@@ -100,17 +100,23 @@ export function EpochComponent({ onRefreshUpdate }: EpochComponentProps) {
         refetchOnWindowFocus: false,
       });
 
-      // Log data when it changes
+      // Log data when it changes (but not too frequently)
       React.useEffect(() => {
         if (epoch) {
-          console.log(`[Epoch] Data received:`, {
-            epoch: epoch.epoch,
-            progress: epoch.epochProgress,
-            timestamp: epoch.timestamp,
-            requestId: epoch.requestId,
-            apiResponseTime: epoch.apiResponseTime,
-            refreshId: epoch.refreshId,
-          });
+          // Only log every 30 seconds to avoid spam
+          const now = Date.now();
+          const lastLog = localStorage.getItem('epoch-last-log');
+          if (!lastLog || now - parseInt(lastLog) > 30000) {
+            console.log(`[Epoch] Data received:`, {
+              epoch: epoch.epoch,
+              progress: epoch.epochProgress,
+              timestamp: epoch.timestamp,
+              requestId: epoch.requestId,
+              apiResponseTime: epoch.apiResponseTime,
+              refreshId: epoch.refreshId,
+            });
+            localStorage.setItem('epoch-last-log', now.toString());
+          }
         }
       }, [epoch]);
 
